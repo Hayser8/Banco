@@ -1,9 +1,34 @@
+"use client";
+
+import { useState } from "react";
+import PeriodSelector from "../../components/dashboard/PeriodSelector";
+import GeneralMetrics from "../../components/dashboard/GeneralMetrics";
+import FraudMetrics from "../../components/dashboard/FraudMetrics";
+import FraudChart from "../../components/dashboard/FraudChart.jsx";
+import TransactionsChart from "../../components/dashboard/TransactionsChart";
+
 export default function Dashboard() {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold">Dashboard</h2>
-        <p className="text-textSecondary">Resumen de actividad y métricas clave.</p>
+  const [selectedPeriod, setSelectedPeriod] = useState("Últimos 7 días");
+
+  return (
+    <div className="p-6">
+      {/* Encabezado */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Dashboard 📊</h1>
+        <PeriodSelector selectedPeriod={selectedPeriod} setSelectedPeriod={setSelectedPeriod} />
       </div>
-    );
-  }
-  
+
+      {/* Métricas Generales */}
+      <GeneralMetrics />
+
+      {/* Métricas de Fraude */}
+      <FraudMetrics />
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <FraudChart />
+        <TransactionsChart />
+      </div>
+    </div>
+  );
+}
