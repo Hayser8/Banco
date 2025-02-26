@@ -1,9 +1,9 @@
 "use client";
 
-import RiskChart from "../../components/insights/RiskChart";
-import FraudAmountChart from "../../components/insights/FraudAmountChart";
-import FraudTimeChart from "../../components/insights/FraudTimeChart";
-import InsightsSummary from "../../components/insights/InsightsSummary";
+import RiskChart from "../../../components/insights/RiskChart";
+import FraudAmountChart from "../../../components/insights/FraudAmountChart";
+import FraudTimeChart from "../../../components/insights/FraudTimeChart";
+import InsightsSummary from "../../../components/insights/InsightsSummary";
 
 export default function DataInsights() {
   return (

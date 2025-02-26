@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import TransactionsTable from "../../components/history/TransactionsTable";
-import TransactionsFilters from "../../components/history/TransactionsFilters";
-import SearchBar from "../../components/history/SearchBar";
+import TransactionsTable from "../../../components/history/TransactionsTable";
+import TransactionsFilters from "../../../components/history/TransactionsFilters";
+import SearchBar from "../../../components/history/SearchBar";
 
 // Datos simulados
 const transactionsData = [

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import FileUpload from "../../components/upload/FileUpload";
-import FilePreview from "../../components/upload/FilePreview";
-import UploadStatus from "../../components/upload/UploadStatus";
+import FileUpload from "../../../components/upload/FileUpload";
+import FilePreview from "../../../components/upload/FilePreview";
+import UploadStatus from "../../../components/upload/UploadStatus";
 
 export default function SubirCSV() {
   const [file, setFile] = useState(null);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Card from "../components/Card.jsx"
+import Card from "../../components/Card.jsx"
 import { FiUpload, FiBarChart2, FiDatabase, FiUser, FiTrendingUp } from "react-icons/fi";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 

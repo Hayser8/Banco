@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import PeriodSelector from "../../components/dashboard/PeriodSelector.jsx";
-import GeneralMetrics from "../../components/dashboard/GeneralMetrics.jsx";
-import FraudMetrics from "../../components/dashboard/FraudMetrics.jsx";
-import FraudChart from "../../components/dashboard/FraudChart.jsx";
-import TransactionsChart from "../../components/dashboard/TransactionsChart.jsx";
+import PeriodSelector from "../../../components/dashboard/PeriodSelector.jsx";
+import GeneralMetrics from "../../../components/dashboard/GeneralMetrics.jsx";
+import FraudMetrics from "../../../components/dashboard/FraudMetrics.jsx";
+import FraudChart from "../../../components/dashboard/FraudChart.jsx";
+import TransactionsChart from "../../../components/dashboard/TransactionsChart.jsx";
 
 export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("Últimos 7 días");
