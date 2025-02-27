@@ -1,5 +1,5 @@
 import AdminSidebar from "../../components/AdminSidebar";
-import "./styles/globals.css"; 
+import "@/app/styles/globals.css"; 
 
 export const metadata = {
   title: "BancoApp - Panel de Administración",

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import ProfileCard from "../../../components/profile/ProfileCard";
-import ProfileTabs from "../../../components/profile/ProfileTabs";
-import ProfileInfo from "../../../components/profile/ProfileInfo";
-import SecuritySettings from "../../../components/profile/SecuritySettings";
-import Preferences from "../../../components/profile/Preferences";
+import ProfileCard from "@/components/profile/ProfileCard";
+import ProfileTabs from "@/components/profile/ProfileTabs";
+import ProfileInfo from "@/components/profile/ProfileInfo";
+import SecuritySettings from "@/components/profile/SecuritySettings";
+import Preferences from "@/components/profile/Preferences";
+
 
 export default function PerfilAdmin() {
   const [activeTab, setActiveTab] = useState("info");

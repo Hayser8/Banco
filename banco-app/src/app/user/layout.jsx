@@ -1,5 +1,5 @@
 import UserSidebar from "../../components/usuario/UserSidebar";
-import "../styles/globals.css"
+import "@/app/styles/globals.css"
 
 export default function UsuarioLayout({ children }) {
   return (
