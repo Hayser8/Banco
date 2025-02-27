@@ -1,9 +1,0 @@
-:START_ID,:END_ID,:TYPE,frecuencia_uso,ubicaciones_frecuentes,estatus_riesgo_usa,fecha_apertura,estatus_actual_posee,saldo_promedio,canal_realiza,comentario,rol,tipo_pago_ocurre,estatus_fraude_ocurre,razon_fraude,evidencia,acciones_tomadas,motivo_alerta,nivel_riesgo_alerta,acción_inicial,estatus_fraude_disp,direccion_ip,tipo_conexion,banco_emisor,transacciones_totales,linked_date,tipo_pago_tarjeta,estatus_fraude_tarjeta,canal_uso
-C001,D001,USA,15,"['Casa','Oficina']",false,,,,,,,,,,,,,,,,,,,,,,,,,,,
-C001,CTA001,POSEE,,,,2022-01-05,true,4000,,,,,,,,,,,,,,,,,
-CTA001,TRX001,REALIZA,,,,,,,Online,Pago de factura,Cliente,,,,,,,,,,,,,,,,
-TRX001,COM001,OCURRE_EN,,,,,,,,,,Tarjeta,false,Ninguna,"N/A",Aprobada,,,,,,,,,
-TRX001,A001,GENERA,,,,,,,,,,,,,Monto elevado,7,Revisión manual,,,,,,,,,
-D001,TRX001,DISPOSITIVO_REALIZA,,,,,,,,,,,,,,,,,false,192.168.1.100,WiFi,,,,,,
-T001,CTA001,ASOCIADA_A,,,,,,,,,,,,,,,,,,,BBVA,50,2023-03-01,,,,,
-T001,TRX001,UTILIZADA_EN,,,,,,,,,,,,,,,,,,,,,Online,false,Web
