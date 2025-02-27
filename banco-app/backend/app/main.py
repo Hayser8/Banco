@@ -1,23 +1,29 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase, basic_auth
 
-# Configurar la conexión a Neo4j
-URI = "bolt://44.203.238.139:7687"
-USER = "neo4j"
-PASSWORD = "lieutenants-troubleshooters-freights"
+app = FastAPI()
 
-driver = GraphDatabase.driver(URI, auth=basic_auth(USER, PASSWORD))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-def test_connection():
-    try:
-        with driver.session(database="neo4j") as session:
-            result = session.run("MATCH (n) RETURN COUNT(n) AS count LIMIT 10")
-            for record in result:
-                print(f"Nodos encontrados: {record['count']}")
-        print("✅ Conexión exitosa a Neo4j")
-    except Exception as e:
-        print(f"❌ Error al conectar con Neo4j: {e}")
-    finally:
-        driver.close()
+driver = GraphDatabase.driver(
+    "bolt://44.203.238.139:7687",
+    auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
+)
 
-if __name__ == "__main__":
-    test_connection()
+@app.get("/transacciones")
+def get_transacciones():
+    cypher_query = """
+    MATCH (t:Transaccion) 
+    RETURN t.fecha_hora AS fecha, t.monto AS monto
+    LIMIT 10
+    """
+    with driver.session(database="neo4j") as session:
+        results = session.run(cypher_query).data()
+    return {"transacciones": results}
