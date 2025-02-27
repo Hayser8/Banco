@@ -1,0 +1,9 @@
+id:ID,:LABEL,cliente_nombre,cliente_fecha_nacimiento,cliente_email,cliente_telefono,cliente_direcciones,cliente_riesgo_acumulado,tarjeta_tipo_tarjeta,tarjeta_limite_credito,tarjeta_estatus,tarjeta_fecha_vencimiento,tarjeta_número_tarjeta,tarjeta_emisor,alerta_descripción,alerta_fecha_creación,alerta_nivel_severidad,alerta_resuelta,comercio_nombre,comercio_categoría,comercio_ubicación,comercio_reputación,transaccion_monto,transaccion_fecha_hora,transaccion_tipo,transaccion_estado,transaccion_ubicación,transaccion_num_cuent_origen,transaccion_num_cuent_destino,transaccion_país_origen,transaccion_país_destino,transaccion_moneda,transaccion_banco_destino,cuenta_tipo,cuenta_saldo_actual,cuenta_fecha_creación,cuenta_estatus,cuenta_moneda,cuenta_saldo_mínimo,dispositivo_tipo_dispositivo,dispositivo_ubicación,dispositivo_estatus_riesgo
+C001,Cliente;Rol,Juan Perez,1980-05-15,juan.perez@banco.com,555-0101,"['Av. Reforma 123', 'Calle Juarez 45']",0.2,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+C002,Cliente;Rol;Admin,Ana Martínez,1975-09-22,ana.martinez@banco.com,555-0202,"['Av. Insurgentes Sur 678']",0.1,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+T001,Tarjeta,,,,,,,Crédito,15000,true,2025-11-30,4111111111111111,Visa,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+A001,Alerta,,,,,,,,,,,,Transacción fuera de horario habitual,2023-04-01,4,false,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+COM001,Comercio,,,,,,,,,,,,,,,,Supermercado La Gran Oferta,Retail,"Av. Central 101",5,,,,,,,,,,,,,,,,,,,,,,,,,
+TRX001,Transacción,,,,,,,,,,,,,,,,,,,,,2500.75,2023-04-10T15:45:00,Transferencia,Completada,"Sucursal 3",CTA001,CTA002,MX,US,USD,Citibanamex,,,,,,,,,
+CTA001,Cuenta,,,,,,,,,,,,,,,,,,,,,,,,,,,,Corriente,5000.50,2022-01-15,true,MXN,1000,,,,,,
+D001,Dispositivo,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Smartphone,"Ciudad de México",false
