@@ -24,22 +24,27 @@ export default function Dashboard() {
     } else {
       days = 7; 
     }
+  
 
     fetch(`http://localhost:8080/general_metrics?days=${days}`)
       .then((res) => res.json())
       .then((data) => setGeneralMetrics(data))
       .catch((err) => console.error("Error en general_metrics:", err));
+  
 
-    fetch("http://localhost:8080/fraud_metrics")
+    fetch(`http://localhost:8080/fraud_metrics?days=${days}`)
       .then((res) => res.json())
       .then((data) => setFraudMetrics(data))
       .catch((err) => console.error("Error en fraud_metrics:", err));
+  
 
     fetch(`http://localhost:8080/transactions_chart?days=${days}`)
       .then((res) => res.json())
       .then((data) => setTransactionsChartData(data.transactions_chart || []))
       .catch((err) => console.error("Error en transactions_chart:", err));
+  
   }, [selectedPeriod]);
+  
 
   return (
     <div className="p-6">
