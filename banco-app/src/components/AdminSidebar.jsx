@@ -25,11 +25,11 @@ export default function AdminSidebar() {
       {/* Menú de navegación */}
       <nav className="space-y-4 mt-10">
         <NavItem href="/" icon={<FiHome size={20} />} label="Inicio" isOpen={isOpen} />
-        <NavItem href="/dashboard" icon={<FiBarChart2 size={20} />} label="Dashboard" isOpen={isOpen} />
-        <NavItem href="/subir-csv" icon={<FiUpload size={20} />} label="Subir CSV" isOpen={isOpen} />
-        <NavItem href="/historial" icon={<FiDatabase size={20} />} label="Historial" isOpen={isOpen} />
-        <NavItem href="/data-insights" icon={<FiBarChart2 size={20} />} label="Data Insights" isOpen={isOpen} />
-        <NavItem href="/perfil" icon={<FiUser size={20} />} label="Perfil" isOpen={isOpen} />
+        <NavItem href="/admin/dashboard" icon={<FiBarChart2 size={20} />} label="Dashboard" isOpen={isOpen} />
+        <NavItem href="/admin/subir-csv" icon={<FiUpload size={20} />} label="Subir CSV" isOpen={isOpen} />
+        <NavItem href="/admin/historial" icon={<FiDatabase size={20} />} label="Historial" isOpen={isOpen} />
+        <NavItem href="/admin/data-insights" icon={<FiBarChart2 size={20} />} label="Data Insights" isOpen={isOpen} />
+        <NavItem href="/admin/perfil" icon={<FiUser size={20} />} label="Perfil" isOpen={isOpen} />
       </nav>
     </aside>
   );
