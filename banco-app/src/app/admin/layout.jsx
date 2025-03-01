@@ -1,9 +1,7 @@
 import AdminSidebar from "../../components/AdminSidebar";
-<<<<<<< Updated upstream
-import "@/app/styles/globals.css"; 
-=======
 import "../styles/globals.css"; 
->>>>>>> Stashed changes
+import "../styles/globals.css"; 
+
 
 export const metadata = {
   title: "BancoApp - Panel de Administración",
