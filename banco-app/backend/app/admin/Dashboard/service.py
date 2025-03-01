@@ -6,9 +6,8 @@ dashboard_router = APIRouter()
 @dashboard_router.get("/general_metrics")
 def get_general_metrics(days: int = None):
     driver = GraphDatabase.driver(
-        "bolt://44.203.238.139:7687",
-        auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-    )
+        "bolt://3.92.180.104:7687",
+        auth=basic_auth("neo4j", "prime-sponge-exhibit"))
     with driver.session(database="neo4j") as session:
         if days:
             total_transacciones = session.run(
@@ -33,9 +32,8 @@ def get_general_metrics(days: int = None):
 @dashboard_router.get("/fraud_metrics")
 def get_fraud_metrics(days: int = 7):
     driver = GraphDatabase.driver(
-        "bolt://44.203.238.139:7687",
-        auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-    )
+        "bolt://3.92.180.104:7687",
+        auth=basic_auth("neo4j", "prime-sponge-exhibit"))
     with driver.session(database="neo4j") as session:
         # Alertas activas (no resueltas) en los últimos X días
         active_alerts = session.run(
@@ -66,9 +64,8 @@ def get_fraud_metrics(days: int = 7):
 @dashboard_router.get("/fraud_chart")
 def get_fraud_chart(days: int = 7):
     driver = GraphDatabase.driver(
-        "bolt://44.203.238.139:7687",
-        auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-    )
+        "bolt://3.92.180.104:7687",
+        auth=basic_auth("neo4j", "prime-sponge-exhibit"))
     query = f"""
         MATCH (a:Alerta)
         WHERE a.resuelta = false
@@ -87,9 +84,8 @@ def get_fraud_chart(days: int = 7):
 @dashboard_router.get("/transactions_chart")
 def get_transactions_chart(days: int = 7):
     driver = GraphDatabase.driver(
-        "bolt://44.203.238.139:7687",
-        auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-    )
+        "bolt://3.92.180.104:7687",
+        auth=basic_auth("neo4j", "prime-sponge-exhibit"))
     query = f"""
         MATCH (t:Transaccion)
         WHERE t.fecha_hora >= datetime() - duration('P{days}D')

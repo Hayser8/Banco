@@ -13,9 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 driver = GraphDatabase.driver(
-  "bolt://44.203.238.139:7687",
-  auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-)
+  "bolt://3.92.180.104:7687",
+  auth=basic_auth("neo4j", "prime-sponge-exhibit"))
 
 @app.get("/transacciones")
 def get_transacciones():
