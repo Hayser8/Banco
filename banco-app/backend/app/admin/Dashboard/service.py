@@ -26,8 +26,17 @@ def get_fraud_metrics():
         auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
     )
     with driver.session(database="neo4j") as session:
-        active_alerts = session.run("MATCH (a:Alerta) WHERE a.resuelta = false RETURN count(a) AS total").single()["total"]
-    return {"active_fraud_alerts": active_alerts}
+        active_alerts = session.run(
+            "MATCH (a:Alerta) WHERE a.resuelta = false RETURN count(a) AS total"
+        ).single()["total"]
+        confirmed_frauds = session.run(
+            "MATCH (a:Alerta) WHERE a.fraude_confirmado = true RETURN count(a) AS confirmed"
+        ).single()["confirmed"]
+    return {
+        "active_fraud_alerts": active_alerts,
+        "fraud_confirmed": confirmed_frauds
+    }
+
 
 @dashboard_router.get("/fraud_chart")
 def get_fraud_chart(days: int = 7):
