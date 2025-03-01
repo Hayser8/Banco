@@ -14,16 +14,6 @@ export default function Dashboard() {
   const [transactionsChartData, setTransactionsChartData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/general_metrics")
-      .then((res) => res.json())
-      .then((data) => setGeneralMetrics(data))
-      .catch((err) => console.error("Error en general_metrics:", err));
-
-    fetch("http://localhost:8080/fraud_metrics")
-      .then((res) => res.json())
-      .then((data) => setFraudMetrics(data))
-      .catch((err) => console.error("Error en fraud_metrics:", err));
-
     let days;
     if (selectedPeriod === "Últimos 7 días") {
       days = 7;
@@ -34,6 +24,16 @@ export default function Dashboard() {
     } else {
       days = 7; 
     }
+
+    fetch(`http://localhost:8080/general_metrics?days=${days}`)
+      .then((res) => res.json())
+      .then((data) => setGeneralMetrics(data))
+      .catch((err) => console.error("Error en general_metrics:", err));
+
+    fetch("http://localhost:8080/fraud_metrics")
+      .then((res) => res.json())
+      .then((data) => setFraudMetrics(data))
+      .catch((err) => console.error("Error en fraud_metrics:", err));
 
     fetch(`http://localhost:8080/transactions_chart?days=${days}`)
       .then((res) => res.json())
@@ -57,7 +57,6 @@ export default function Dashboard() {
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        {/* FraudChart recibe selectedPeriod y hace su propio fetch */}
         <FraudChart selectedPeriod={selectedPeriod} />
         <TransactionsChart data={transactionsChartData} />
       </div>

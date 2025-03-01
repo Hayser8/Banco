@@ -4,15 +4,26 @@ from neo4j import GraphDatabase, basic_auth
 dashboard_router = APIRouter()
 
 @dashboard_router.get("/general_metrics")
-def get_general_metrics():
+def get_general_metrics(days: int = None):
     driver = GraphDatabase.driver(
         "bolt://44.203.238.139:7687",
         auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
     )
     with driver.session(database="neo4j") as session:
-        total_transacciones = session.run("MATCH (t:Transaccion) RETURN count(t) AS total").single()["total"]
-        total_clientes = session.run("MATCH (c:Cliente) RETURN count(c) AS total").single()["total"]
-        total_cuentas = session.run("MATCH (cu:Cuenta) RETURN count(cu) AS total").single()["total"]
+        if days:
+            total_transacciones = session.run(
+                "MATCH (t:Transaccion) WHERE t.fecha_hora >= datetime() - duration({days: $days}) RETURN count(t) AS total",
+                {"days": days}
+            ).single()["total"]
+            total_cuentas = session.run(
+                "MATCH (cu:Cuenta) WHERE cu.fecha_creacion >= datetime() - duration({days: $days}) RETURN count(cu) AS total",
+                {"days": days}
+            ).single()["total"]
+            total_clientes = session.run("MATCH (c:Cliente) RETURN count(c) AS total").single()["total"]
+        else:
+            total_transacciones = session.run("MATCH (t:Transaccion) RETURN count(t) AS total").single()["total"]
+            total_clientes = session.run("MATCH (c:Cliente) RETURN count(c) AS total").single()["total"]
+            total_cuentas = session.run("MATCH (cu:Cuenta) RETURN count(cu) AS total").single()["total"]
     return {
         "total_transacciones": total_transacciones,
         "total_clientes": total_clientes,
