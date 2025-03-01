@@ -13,16 +13,15 @@ app.add_middleware(
 )
 
 driver = GraphDatabase.driver(
-    "bolt://44.203.238.139:7687",
-    auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
-)
+  "bolt://44.203.238.139:7687",
+  auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights"))
 
 @app.get("/transacciones")
 def get_transacciones():
     cypher_query = """
     MATCH (t:Transaccion) 
     RETURN t.fecha_hora AS fecha, t.monto AS monto
-    LIMIT 10
+    LIMIT 5000
     """
     with driver.session(database="neo4j") as session:
         results = session.run(cypher_query).data()

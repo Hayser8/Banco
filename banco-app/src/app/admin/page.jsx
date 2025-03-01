@@ -7,7 +7,7 @@ export default function HomePage() {
   const [transacciones, setTransacciones] = useState([]);
 
   useEffect(() => {
-    fetch("http://192.168.1.36:8080/transacciones")
+    fetch("http://localhost:8080/transacciones")
       .then(response => response.json())
       .then(data => {
         console.log("Datos recibidos:", data);
