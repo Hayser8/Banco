@@ -20,17 +20,17 @@ def get_general_metrics():
     }
 
 @dashboard_router.get("/fraud_metrics")
-def get_fraud_metrics():
+def get_fraud_metrics(days: int = 7):
     driver = GraphDatabase.driver(
         "bolt://44.203.238.139:7687",
         auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
     )
     with driver.session(database="neo4j") as session:
         active_alerts = session.run(
-            "MATCH (a:Alerta) WHERE a.resuelta = false RETURN count(a) AS total"
+            f"MATCH (a:Alerta) WHERE a.resuelta = false AND a.fecha_creacion >= datetime() - duration('P{days}D') RETURN count(a) AS total"
         ).single()["total"]
         confirmed_frauds = session.run(
-            "MATCH (a:Alerta) WHERE a.fraude_confirmado = true RETURN count(a) AS confirmed"
+            f"MATCH (a:Alerta) WHERE a.fraude_confirmado = true AND a.fecha_creacion >= datetime() - duration('P{days}D') RETURN count(a) AS confirmed"
         ).single()["confirmed"]
     return {
         "active_fraud_alerts": active_alerts,
@@ -44,7 +44,6 @@ def get_fraud_chart(days: int = 7):
         "bolt://44.203.238.139:7687",
         auth=basic_auth("neo4j", "lieutenants-troubleshooters-freights")
     )
-
     query = f"""
         MATCH (a:Alerta)
         WHERE a.resuelta = false

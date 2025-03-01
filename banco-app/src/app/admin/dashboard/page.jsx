@@ -19,7 +19,6 @@ export default function Dashboard() {
       .then((data) => setGeneralMetrics(data))
       .catch((err) => console.error("Error en general_metrics:", err));
 
-
     fetch("http://localhost:8080/fraud_metrics")
       .then((res) => res.json())
       .then((data) => setFraudMetrics(data))
