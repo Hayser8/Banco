@@ -10,17 +10,22 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
     let filtered = transactions;
 
     if (selectedStatus) {
-      filtered = filtered.filter((txn) => txn.estado === selectedStatus);
+      filtered = filtered.filter(
+        (txn) => txn.estado.toLowerCase() === selectedStatus.toLowerCase()
+      );
     }
 
     if (dateRange) {
       const today = new Date();
       let filterDate = new Date(today);
-      
+
       if (dateRange === "Últimos 7 días") filterDate.setDate(today.getDate() - 7);
       if (dateRange === "Últimos 30 días") filterDate.setDate(today.getDate() - 30);
 
-      filtered = filtered.filter((txn) => new Date(txn.fecha) >= filterDate);
+      filtered = filtered.filter((txn) => {
+        const txnDate = new Date(txn.fecha);
+        return txnDate >= filterDate;
+      });
     }
 
     setFilteredTransactions(filtered);
@@ -35,9 +40,10 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
         onChange={(e) => setSelectedStatus(e.target.value)}
       >
         <option value="">Todos los estados</option>
-        <option value="Completada">Completada</option>
-        <option value="Pendiente">Pendiente</option>
-        <option value="Fraudulenta">Fraudulenta</option>
+        <option value="exitosa">Exitosa</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="fraudulenta">Fraudulenta</option>
+        <option value="fallida">Fallida</option>
       </select>
 
       {/* Filtro por Fecha */}
@@ -52,7 +58,10 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
       </select>
 
       {/* Botón Aplicar */}
-      <button onClick={applyFilters} className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600">
+      <button
+        onClick={applyFilters}
+        className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600"
+      >
         Aplicar Filtros
       </button>
     </div>

@@ -3,11 +3,16 @@
 import TableRow from "./TableRow";
 
 export default function TransactionsTable({ transactions, searchQuery }) {
-  const filteredTransactions = transactions.filter(
-    (txn) =>
-      txn.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.cliente.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTransactions = transactions.filter((txn) => {
+    const idStr = (txn.transaccion_id || "").toLowerCase();
+    const clienteStr = (txn.cliente || "").toLowerCase();
+    const searchStr = (searchQuery || "").toLowerCase();
+
+    return (
+      idStr.includes(searchStr) ||
+      clienteStr.includes(searchStr)
+    );
+  });
 
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor">
@@ -23,7 +28,7 @@ export default function TransactionsTable({ transactions, searchQuery }) {
         </thead>
         <tbody>
           {filteredTransactions.map((txn) => (
-            <TableRow key={txn.id} transaction={txn} />
+            <TableRow key={txn.transaccion_id} transaction={txn} />
           ))}
         </tbody>
       </table>

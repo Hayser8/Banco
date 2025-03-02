@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase, basic_auth
 from admin.Dashboard.service import dashboard_router
+from admin.historial.service import historial_router
 
 app = FastAPI()
 
@@ -29,6 +30,8 @@ def get_transacciones():
 
 
 app.include_router(dashboard_router)
+app.include_router(historial_router)
+
   
 if __name__ == "__main__":
     import uvicorn

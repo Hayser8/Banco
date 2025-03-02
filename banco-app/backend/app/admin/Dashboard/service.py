@@ -45,7 +45,6 @@ def get_fraud_metrics(days: int = 7):
             """
         ).single()["total"]
         
-        # Alertas de fraude confirmado en los últimos X días
         confirmed_frauds = session.run(
             f"""
             MATCH (a:Alerta)
