@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from typing import Optional
 from neo4j import GraphDatabase, basic_auth
 
@@ -10,15 +10,7 @@ def get_transacciones(
     days: Optional[int] = None,
     search: Optional[str] = None
 ):
-    """
-    Retorna:
-      - transaccion_id (real),
-      - cliente (nombre),
-      - fecha,
-      - monto,
-      - estado.
-    Se unen los nodos: Cliente -> Cuenta -> Transaccion, evitando duplicados.
-    """
+
     driver = GraphDatabase.driver(
         "bolt://3.92.180.104:7687",
         auth=basic_auth("neo4j", "prime-sponge-exhibit")
@@ -27,8 +19,9 @@ def get_transacciones(
     with driver.session(database="neo4j") as session:
         query = """
             MATCH (c:Cliente)-[:CLIENTE_POSEE_CUENTA]->(cu:Cuenta)
-            OPTIONAL MATCH (cu)-[:CUENTA_REALIZA_TRANSACCION]->(tx:Transaccion)
-            WHERE tx IS NOT NULL
+            MATCH (cu)-[:CUENTA_REALIZA_TRANSACCION]->(tx:Transaccion)
+            OPTIONAL MATCH (tx)-[:TRANSACCION_GENERA_ALERTA]->(a:Alerta)
+            WHERE 1=1
         """
         params = {}
 
@@ -37,8 +30,7 @@ def get_transacciones(
             params["status"] = status
 
         if days:
-            query += " AND tx.fecha_hora >= datetime() - duration({days: $days})"
-            params["days"] = days
+            query += f" AND tx.fecha_hora >= datetime() - duration('P{days}D')"
 
         if search:
             query += """
@@ -49,13 +41,16 @@ def get_transacciones(
             """
             params["search"] = search
 
+
         query += """
-            WITH tx.id_transaccion AS transaccion_id, 
-                 head(collect(DISTINCT c.nombre)) AS cliente, 
-                 tx.fecha_hora AS fecha, 
-                 tx.monto AS monto, 
-                 tx.estado AS estado
-            RETURN transaccion_id, cliente, fecha, monto, estado
+            WITH tx, c, collect(a) AS alerts
+            RETURN
+                tx.id_transaccion AS transaccion_id,
+                c.nombre AS cliente,
+                tx.fecha_hora AS fecha,
+                tx.monto AS monto,
+                tx.estado AS estado,
+                ANY(al IN alerts WHERE al.fraude_confirmado = true) AS es_fraudulenta
             ORDER BY fecha DESC
         """
 
@@ -68,6 +63,7 @@ def get_transacciones(
                 "fecha": record["fecha"].isoformat() if record["fecha"] else None,
                 "monto": record["monto"],
                 "estado": record["estado"],
+                "es_fraudulenta": record["es_fraudulenta"]
             })
 
     return {"transacciones": data}

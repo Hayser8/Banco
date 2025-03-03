@@ -10,9 +10,13 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
     let filtered = transactions;
 
     if (selectedStatus) {
-      filtered = filtered.filter(
-        (txn) => txn.estado.toLowerCase() === selectedStatus.toLowerCase()
-      );
+      if (selectedStatus.toLowerCase() === "fraudulenta") {
+        filtered = filtered.filter((txn) => txn.es_fraudulenta === true);
+      } else {
+        filtered = filtered.filter((txn) =>
+          txn.estado.toLowerCase() === selectedStatus.toLowerCase()
+        );
+      }
     }
 
     if (dateRange) {
@@ -33,7 +37,7 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
 
   return (
     <div className="bg-card p-4 rounded-lg shadow-md border border-borderColor mb-6 flex gap-4">
-      {/* Filtro por Estado */}
+      {/* Filtro por Estado/Fraude */}
       <select
         className="bg-card text-textPrimary p-2 rounded-md"
         value={selectedStatus}

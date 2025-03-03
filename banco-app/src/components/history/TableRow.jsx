@@ -13,7 +13,7 @@ export default function TableRow({ transaction }) {
       <td className="p-3">${montoFormateado}</td>
       <td
         className={`p-3 font-semibold ${
-          transaction.estado?.toLowerCase() === "fraudulenta"
+          transaction.estado?.toLowerCase() === "fallida"
             ? "text-red-500"
             : "text-green-400"
         }`}
