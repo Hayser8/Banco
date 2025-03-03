@@ -1,4 +1,4 @@
-import "../styles/globals.css"
+import "../styles/globals.css";
 
 export default function LandingLayout({ children }) {
   return (
@@ -11,9 +11,8 @@ export default function LandingLayout({ children }) {
         {/* Navbar */}
         <header className="bg-gray-800 shadow-md py-4 px-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-blue-400">GSquared Bank</h1>
-          <nav className="space-x-6">
+          <nav>
             <a href="/login" className="hover:text-blue-300">Iniciar Sesión</a>
-            <a href="/register" className="hover:text-blue-300">Registrarse</a>
           </nav>
         </header>
 
