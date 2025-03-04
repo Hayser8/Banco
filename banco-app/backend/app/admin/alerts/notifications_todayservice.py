@@ -8,9 +8,6 @@ AUTH = basic_auth("neo4j", "prime-sponge-exhibit")
 
 @notifications_today_router.get("/notifications/today")
 def get_today_notifications():
-    """
-    Muestra alertas creadas HOY, no resueltas y no vistas (vista=false).
-    """
     driver = GraphDatabase.driver(URI, auth=AUTH)
     try:
         with driver.session() as session:
@@ -27,21 +24,29 @@ def get_today_notifications():
             """
             results = session.run(query)
             data = []
+            alert_ids = []
             for record in results:
                 data.append({
                     "id_alerta": record["id_alerta"],
                     "descripcion": record["descripcion"],
                     "fecha_creacion": record["fecha_creacion"].isoformat() if record["fecha_creacion"] else None
                 })
+                alert_ids.append(record["id_alerta"])
+
+            if alert_ids:
+                session.run("""
+                MATCH (a:Alerta)
+                WHERE a.id_alerta IN $alert_ids
+                SET a.vista = true
+                """, {"alert_ids": alert_ids})
+
             return {"notifications": data}
     finally:
         driver.close()
 
 @notifications_today_router.get("/notifications/today/count")
 def get_today_notifications_count():
-    """
-    Cantidad de alertas no resueltas, no vistas, generadas hoy.
-    """
+
     driver = GraphDatabase.driver(URI, auth=AUTH)
     try:
         with driver.session() as session:
