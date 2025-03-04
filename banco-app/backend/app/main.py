@@ -1,19 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import GraphDatabase, basic_auth
 from datetime import datetime
-
 from admin.Dashboard.service import dashboard_router
 from admin.historial.service import historial_router
 from admin.alerts.service import alerts_router
 from admin.alerts.alerts_generationservice import generate_alerts_router
 from admin.alerts.notifications_todayservice import notifications_today_router
-from admin.datascience.service import data_insights_router
 from admin.profile.service import profile_router
 from admin.subir_csv.service import csv_router
 from login.service import login_router
 from user.service import user_router
 from user.transactions.service import transaction_router
+
 
 
 app = FastAPI()
@@ -33,6 +32,8 @@ driver = GraphDatabase.driver(URI, auth=AUTH)
 @app.on_event("shutdown")
 def shutdown_event():
     driver.close()
+
+
 
 @app.get("/transacciones")
 def get_transacciones():
@@ -57,7 +58,6 @@ def get_transacciones():
 app.include_router(dashboard_router)
 app.include_router(historial_router)
 app.include_router(alerts_router)
-app.include_router(data_insights_router)
 app.include_router(generate_alerts_router)     
 app.include_router(notifications_today_router)
 app.include_router(profile_router)

@@ -56,7 +56,6 @@ export default function AdminSidebar() {
         <NavItem href="/admin/dashboard" icon={<FiBarChart2 size={20} />} label="Dashboard" isOpen={isOpen} />
         <NavItem href="/admin/subir-csv" icon={<FiUpload size={20} />} label="Subir CSV" isOpen={isOpen} />
         <NavItem href="/admin/historial" icon={<FiDatabase size={20} />} label="Historial" isOpen={isOpen} />
-        <NavItem href="/admin/data-insights" icon={<FiBarChart2 size={20} />} label="Data Insights" isOpen={isOpen} />
         <NavItem href="/admin/alerts" icon={<FiAlertCircle size={20} />} label="Alertas" isOpen={isOpen} />
         
         <NavItem

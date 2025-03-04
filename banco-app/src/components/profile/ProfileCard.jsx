@@ -23,21 +23,25 @@ export default function ProfileCard() {
 
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor flex items-center gap-6">
-      <div className="relative">
-        <img
-          src="/perfiladmin.jpg"
+      <div className="relative w-20 h-20">
+        <Image
+          src="/naruto.webp"
           alt="Foto de Perfil"
-          width={80}
-          height={80}
+          fill
           className="rounded-full border-2 border-primary"
         />
-     
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold">{profile.nombre || "Cargando..."}</h2>
-        <p className="text-textSecondary">{profile.email || "Cargando..."}</p>
-        <span className="text-green-400 text-sm">{profile.rol || "Cargando..."}</span>
+        <h2 className="text-xl font-semibold">
+          {profile.nombre || "Cargando..."}
+        </h2>
+        <p className="text-textSecondary">
+          {profile.email || "Cargando..."}
+        </p>
+        <span className="text-green-400 text-sm">
+          {profile.rol || "Cargando..."}
+        </span>
       </div>
     </div>
   );

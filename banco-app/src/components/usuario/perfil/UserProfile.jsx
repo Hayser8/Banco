@@ -1,47 +1,109 @@
 "use client";
 
-import { useState } from "react";
-import { FiUser, FiMail, FiLock, FiBell, FiMoon, FiGlobe, FiImage } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiUser, FiMail } from "react-icons/fi";
 
 export default function UserProfile() {
   const [formData, setFormData] = useState({
-    nombre: "Juan Pérez",
-    email: "juan.perez@example.com",
-    idioma: "es",
-    notificaciones: true,
-    modoOscuro: true,
-    nuevaContrasena: "",
+    nombre: "",
+    email: "",
   });
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Recupera el nombre del usuario desde localStorage (clave "usuario")
+    const storedUsuario = localStorage.getItem("usuario");
+    if (storedUsuario) {
+      // Inicialmente seteamos el nombre desde localStorage
+      setFormData((prev) => ({ ...prev, nombre: storedUsuario }));
+
+      // Luego, hacemos una consulta al backend para obtener los datos completos (incluido el email)
+      fetch(`http://localhost:8080/perfil?nombre=${encodeURIComponent(storedUsuario)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          // Se asume que la respuesta tiene las propiedades "nombre" y "email"
+          setFormData({
+            nombre: data.nombre || storedUsuario,
+            email: data.email || "",
+          });
+          setIsLoaded(true);
+        })
+        .catch((error) => {
+          console.error("Error al obtener perfil:", error);
+          setIsLoaded(true);
+        });
+    } else {
+      setIsLoaded(true);
+    }
+  }, []);
 
   const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Perfil actualizado con éxito! 🚀");
+
+    // Usamos el email obtenido (o se puede seguir usando "usuario" como identificador)
+    if (!formData.email) {
+      alert("No se encontró la información de la sesión.");
+      return;
+    }
+
+    const payload = {
+      current_email: formData.email,
+      nombre: formData.nombre,
+      email: formData.email,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        alert("¡Perfil actualizado con éxito! 🚀");
+        // Actualiza el localStorage si se cambió el nombre
+        localStorage.setItem("usuario", formData.nombre);
+        localStorage.setItem("userEmail", formData.email);
+      } else {
+        const errorData = await response.json();
+        alert("Error al actualizar el perfil: " + errorData.detail);
+      }
+    } catch (error) {
+      alert("Error de conexión: " + error.message);
+    }
   };
+
+  if (!isLoaded) {
+    return <div>Cargando datos del usuario...</div>;
+  }
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
-      <h3 className="text-xl font-semibold mb-4 text-white text-center">Perfil del Usuario 🏦</h3>
+      <h3 className="text-xl font-semibold mb-4 text-white text-center">
+        Perfil del Usuario 🏦
+      </h3>
 
-      {/* Imagen de Perfil */}
+      {/* Imagen de Perfil con rocklee.jpg */}
       <div className="flex justify-center mb-4">
-        <label className="cursor-pointer relative">
-          <input type="file" className="hidden" />
-          <div className="w-24 h-24 bg-gray-900 rounded-full flex items-center justify-center border border-gray-600 hover:bg-gray-700 transition">
-            <FiImage size={30} className="text-gray-400" />
-          </div>
-        </label>
+        <img
+          src="/rocklee.jpg"
+          alt="Rocklee"
+          className="w-24 h-24 object-cover rounded-full border border-gray-600 hover:opacity-80 transition"
+        />
       </div>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
-        {/* Nombre y Correo */}
+        {/* Campos de Nombre y Correo */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
             <FiUser className="text-gray-400 mr-3" />
@@ -68,73 +130,11 @@ export default function UserProfile() {
           </div>
         </div>
 
-        {/* Seguridad */}
-        <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-          <FiLock className="text-gray-400 mr-3" />
-          <input
-            type="password"
-            name="nuevaContrasena"
-            value={formData.nuevaContrasena}
-            onChange={handleChange}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Nueva Contraseña"
-          />
-        </div>
-
-        {/* Configuraciones */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Notificaciones */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              name="notificaciones"
-              checked={formData.notificaciones}
-              onChange={handleChange}
-              className="hidden"
-            />
-            <div className={`w-10 h-5 flex items-center bg-gray-600 rounded-full p-1 transition ${formData.notificaciones ? "bg-blue-500" : ""}`}>
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition ${formData.notificaciones ? "translate-x-5" : ""}`}></div>
-            </div>
-            <span className="text-white flex items-center gap-2">
-              <FiBell /> Notificaciones
-            </span>
-          </label>
-
-          {/* Modo Oscuro */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              name="modoOscuro"
-              checked={formData.modoOscuro}
-              onChange={handleChange}
-              className="hidden"
-            />
-            <div className={`w-10 h-5 flex items-center bg-gray-600 rounded-full p-1 transition ${formData.modoOscuro ? "bg-blue-500" : ""}`}>
-              <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition ${formData.modoOscuro ? "translate-x-5" : ""}`}></div>
-            </div>
-            <span className="text-white flex items-center gap-2">
-              <FiMoon /> Modo Oscuro
-            </span>
-          </label>
-
-          {/* Idioma */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiGlobe className="text-gray-400 mr-3" />
-            <select
-              name="idioma"
-              value={formData.idioma}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-            >
-              <option value="es">Español</option>
-              <option value="en">Inglés</option>
-              <option value="fr">Francés</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Botón Guardar */}
-        <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md flex items-center justify-center gap-2 mt-4">
+        {/* Botón para guardar cambios */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md flex items-center justify-center gap-2 mt-4"
+        >
           Guardar Cambios
         </button>
       </form>

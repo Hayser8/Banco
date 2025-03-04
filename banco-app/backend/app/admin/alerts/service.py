@@ -127,3 +127,53 @@ def resolve_alert(alert_id: str):
             return {"detail": f"Alerta {result['id']} resuelta correctamente"}
     finally:
         driver.close()
+
+@alerts_router.delete("/alerts/batch-delete")
+def delete_multiple_alerts(alert_ids: dict):
+    """
+    Elimina varias alertas a la vez.
+    """
+    driver = GraphDatabase.driver(URI, auth=AUTH)
+    alert_list = alert_ids.get("alert_ids", [])
+    
+    if not alert_list:
+        raise HTTPException(status_code=400, detail="No se enviaron alertas para eliminar.")
+
+    try:
+        with driver.session(database="neo4j") as session:
+            delete_query = """
+            MATCH (a:Alerta)
+            WHERE a.id_alerta IN $alert_list
+            DETACH DELETE a
+            """
+            session.run(delete_query, {"alert_list": alert_list})
+            
+        return {"detail": f"Se eliminaron {len(alert_list)} alertas correctamente"}
+    finally:
+        driver.close()
+
+
+@alerts_router.patch("/alerts/batch-resolve")
+def resolve_multiple_alerts(alert_ids: dict):
+    """
+    Marca varias alertas como resueltas.
+    """
+    driver = GraphDatabase.driver(URI, auth=AUTH)
+    alert_list = alert_ids.get("alert_ids", [])
+
+    if not alert_list:
+        raise HTTPException(status_code=400, detail="No se enviaron alertas para resolver.")
+
+    try:
+        with driver.session(database="neo4j") as session:
+            update_query = """
+            MATCH (a:Alerta)
+            WHERE a.id_alerta IN $alert_list
+            SET a.resuelta = true, a.fraude_confirmado = false
+            """
+            session.run(update_query, {"alert_list": alert_list})
+            
+        return {"detail": f"Se marcaron {len(alert_list)} alertas como resueltas"}
+    finally:
+        driver.close()
+
