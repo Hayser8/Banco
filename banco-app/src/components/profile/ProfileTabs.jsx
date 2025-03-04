@@ -4,8 +4,6 @@ export default function ProfileTabs({ activeTab, setActiveTab }) {
   return (
     <div className="flex gap-4 border-b border-borderColor mt-6">
       <TabButton label="Información" value="info" activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TabButton label="Seguridad" value="security" activeTab={activeTab} setActiveTab={setActiveTab} />
-      <TabButton label="Preferencias" value="preferences" activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 }

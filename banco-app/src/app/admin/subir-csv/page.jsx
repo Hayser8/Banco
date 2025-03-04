@@ -102,11 +102,11 @@ export default function Page() {
       return;
     }
 
-    // Parsear CSV de Nodos y Relaciones
+    // Parsear CSV de Nodos y Relaciones para validación y generación del grafo
     const nodesData = await parseCSV(nodesFile, expectedHeaders.nodes);
     const relationsData = await parseCSV(relationsFile, expectedHeaders.relationships);
 
-    // Revisar si hay errores
+    // Revisar si hay errores de validación
     if (nodesData.errors.length > 0) {
       setUploadStatus(`Error en Nodes CSV: ${nodesData.errors.join("; ")}`);
       return;
@@ -116,18 +116,36 @@ export default function Page() {
       return;
     }
 
-    // Crear el grafo
+    // Crear el grafo para visualizarlo
     const graph = buildGraph(nodesData.data, relationsData.data);
-
     setGraphData(graph);
-    setUploadStatus("Archivos validados y grafo generado correctamente.");
+
+    // Realizar la subida a la base de datos llamando al endpoint del backend
+    const formData = new FormData();
+    formData.append("nodes", nodesFile);
+    formData.append("relationships", relationsFile);
+
+    try {
+      const response = await fetch("http://localhost:8080/upload-csv/", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setUploadStatus(`Error al subir datos a la DB: ${result.detail}`);
+      } else {
+        setUploadStatus("Archivos validados, grafo generado y datos subidos correctamente a la base de datos.");
+      }
+    } catch (error) {
+      setUploadStatus("Error al conectar con el servidor: " + error.message);
+    }
   };
 
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4">Subir CSV y Visualizar Grafo 📂</h1>
       <p className="text-textSecondary mb-6">
-        Sube los archivos CSV para nodos y relaciones. Se validará su estructura antes de visualizar el grafo.
+        Sube los archivos CSV para nodos y relaciones. Se validará su estructura, se generará el grafo y se subirá la información a la base de datos.
       </p>
 
       <FileUpload label="Subir CSV de Nodos" setFile={setNodesFile} />
@@ -142,7 +160,7 @@ export default function Page() {
         className="bg-primary text-white px-4 py-2 rounded-lg mt-4"
         onClick={handleFileUpload}
       >
-        Validar y Generar Grafo
+        Validar, Generar Grafo y Subir a DB
       </button>
 
       {graphData && (
@@ -213,7 +231,7 @@ function parseCSVLine(line) {
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
+
     if (char === '"') {
       // Si estamos en comillas y el siguiente también es comilla, es una comilla escapada
       if (inQuotes && line[i + 1] === '"') {
@@ -234,7 +252,6 @@ function parseCSVLine(line) {
   return result;
 }
 
-
 /**
  * Crea nodos y edges para Cytoscape.
  *
@@ -248,36 +265,28 @@ function buildGraph(nodesData, relationshipsData) {
   // 1) Extraer los IDs de nodos válidos (col 0 = id:ID)
   const validNodeIds = new Set(nodesData.map(row => row[0]?.trim()).filter(Boolean));
 
-  // 2) Construir nodos
-  //    - Filtra cualquier fila donde id sea vacío
+  // 2) Construir nodos (filtrando filas sin id)
   const nodes = nodesData
     .filter(row => row[0]?.trim())
-    .map(row => {
-      return {
-        data: {
-          id: row[0].trim(),
-          label: row[1]?.trim() || "SinLabel",
-        },
-      };
-    });
+    .map(row => ({
+      data: {
+        id: row[0].trim(),
+        label: row[1]?.trim() || "SinLabel",
+      },
+    }));
 
-  // 3) Construir edges
-  //    - Filtra edges con source/target vacíos
-  //    - Filtra edges que apunten a nodos inexistentes
+  // 3) Construir edges: filtrar filas con source/target no vacíos y que existan en nodos
   const edges = relationshipsData
-    .filter(row => row[0]?.trim() && row[1]?.trim()) // no source/target vacío
+    .filter(row => row[0]?.trim() && row[1]?.trim())
     .filter(row => validNodeIds.has(row[0].trim()) && validNodeIds.has(row[1].trim()))
-    .map(row => {
-      return {
-        data: {
-          source: row[0].trim(),
-          target: row[1].trim(),
-          label: row[2]?.trim() || "Relación",
-        },
-      };
-    });
+    .map(row => ({
+      data: {
+        source: row[0].trim(),
+        target: row[1].trim(),
+        label: row[2]?.trim() || "Relación",
+      },
+    }));
 
-  // Depurar: Loguea si quieres ver la cantidad de nodos/edges generados
   console.log("Nodos generados:", nodes.length);
   console.log("Edges generados:", edges.length);
 

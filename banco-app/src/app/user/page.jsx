@@ -1,16 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { FiDollarSign, FiTrendingUp, FiClock } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import { FiDollarSign, FiClock } from "react-icons/fi";
 
 export default function UsuarioHome() {
-  const [accountBalance, setAccountBalance] = useState(3500.75);
-  const [lastTransaction, setLastTransaction] = useState({
-    id: "TXN045",
-    fecha: "2024-02-25",
-    monto: 150.00,
-    estado: "Completada",
-  });
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [lastTransaction, setLastTransaction] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Leer el usuario actual desde el localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario"); // Cambio aquí
+    if (storedUser) {
+      setCurrentUser(storedUser); // Ya es un string, no necesita JSON.parse
+    }
+  }, []);
+
+  // Cuando se tiene el usuario, se hace fetch al backend para obtener su información
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+    async function fetchUserData() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/user/details?nombre=${encodeURIComponent(currentUser)}`
+        );
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        // Se actualiza el saldo y la última transacción
+        setAccountBalance(data?.account?.saldo_actual ?? 0);
+
+        if (data?.lastTransaction) {
+          setLastTransaction({
+            id: data.lastTransaction.id_transaccion,
+            fecha: data.lastTransaction.fecha_hora,
+            monto: data.lastTransaction.monto,
+            estado: data.lastTransaction.estado,
+          });
+        } else {
+          setLastTransaction(null);
+        }
+      } catch (err) {
+        console.error("Error al obtener datos del usuario:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUserData();
+  }, [currentUser]);
+
+  if (loading) {
+    return <div className="p-4">Cargando datos...</div>;
+  }
+  if (error) {
+    return <div className="p-4 text-red-400">Error: {error}</div>;
+  }
 
   return (
     <div>
@@ -28,9 +80,17 @@ export default function UsuarioHome() {
         />
         <SummaryCard
           title="Última Transacción"
-          value={`$${lastTransaction.monto.toFixed(2)}`}
+          value={
+            lastTransaction
+              ? `$${parseFloat(lastTransaction.monto).toFixed(2)}`
+              : "$0.00"
+          }
           icon={<FiClock size={24} />}
-          extraInfo={`ID: ${lastTransaction.id} - ${lastTransaction.estado}`}
+          extraInfo={
+            lastTransaction
+              ? `ID: ${lastTransaction.id} - ${lastTransaction.estado}`
+              : "No hay transacciones registradas"
+          }
         />
       </div>
     </div>

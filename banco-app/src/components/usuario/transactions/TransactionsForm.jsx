@@ -19,7 +19,7 @@ export default function TransactionsForm({ setTransactionStatus, saldoDisponible
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const monto = parseFloat(formData.monto);
 
@@ -33,8 +33,23 @@ export default function TransactionsForm({ setTransactionStatus, saldoDisponible
       return;
     }
 
-    setSaldoDisponible((prevSaldo) => prevSaldo - monto);
-    setTransactionStatus("success");
+    try {
+      const response = await fetch("http://localhost:8080/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      setSaldoDisponible((prevSaldo) => prevSaldo - monto);
+      setTransactionStatus("success");
+    } catch (error) {
+      console.error("Error en la transacción:", error);
+      setTransactionStatus("error");
+    }
   };
 
   return (
@@ -42,132 +57,53 @@ export default function TransactionsForm({ setTransactionStatus, saldoDisponible
       <h3 className="text-xl font-semibold mb-4 text-white text-center">Realizar Pago 💸</h3>
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Destinatario */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiUser className="text-gray-400 mr-3" />
-            <input
-              type="text"
-              name="destinatario"
-              value={formData.destinatario}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-              placeholder="Cuenta o Correo"
-              required
-            />
-          </div>
-
-          {/* Número de Cuenta */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiHash className="text-gray-400 mr-3" />
-            <input
-              type="text"
-              name="numeroCuenta"
-              value={formData.numeroCuenta}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-              placeholder="Número de Cuenta"
-              required
-            />
-          </div>
+          <InputField icon={<FiUser />} name="destinatario" value={formData.destinatario} onChange={handleChange} placeholder="Cuenta o Correo" required />
+          <InputField icon={<FiHash />} name="numeroCuenta" value={formData.numeroCuenta} onChange={handleChange} placeholder="Número de Cuenta" required />
         </div>
 
-        {/* Alias */}
-        <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-          <FiTag className="text-gray-400 mr-3" />
-          <input
-            type="text"
-            name="alias"
-            value={formData.alias}
-            onChange={handleChange}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Alias del destinatario (Opcional)"
-          />
-        </div>
+        <InputField icon={<FiTag />} name="alias" value={formData.alias} onChange={handleChange} placeholder="Alias del destinatario (Opcional)" />
 
-        {/* Tipo de Cuenta y País */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Tipo de Cuenta */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiCreditCard className="text-gray-400 mr-3" />
-            <select
-              name="tipoCuenta"
-              value={formData.tipoCuenta}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-            >
-              <option value="corriente">Cuenta Corriente</option>
-              <option value="ahorro">Cuenta de Ahorros</option>
-            </select>
-          </div>
-
-          {/* País */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiGlobe className="text-gray-400 mr-3" />
-            <select
-              name="pais"
-              value={formData.pais}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-            >
-              <option value="GT">Guatemala</option>
-              <option value="MX">México</option>
-              <option value="US">Estados Unidos</option>
-              <option value="ES">España</option>
-            </select>
-          </div>
+          <SelectField icon={<FiCreditCard />} name="tipoCuenta" value={formData.tipoCuenta} onChange={handleChange} options={{ corriente: "Cuenta Corriente", ahorro: "Cuenta de Ahorros" }} />
+          <SelectField icon={<FiGlobe />} name="pais" value={formData.pais} onChange={handleChange} options={{ GT: "Guatemala", MX: "México", US: "Estados Unidos", ES: "España" }} />
         </div>
 
-        {/* Moneda y Monto */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Moneda */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiDollarSign className="text-gray-400 mr-3" />
-            <select
-              name="moneda"
-              value={formData.moneda}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-            >
-              <option value="USD">USD - Dólar</option>
-              <option value="EUR">EUR - Euro</option>
-              <option value="GTQ">GTQ - Quetzal</option>
-            </select>
-          </div>
-
-          {/* Monto */}
-          <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiDollarSign className="text-gray-400 mr-3" />
-            <input
-              type="number"
-              name="monto"
-              value={formData.monto}
-              onChange={handleChange}
-              className="w-full bg-transparent focus:outline-none text-white"
-              placeholder="Monto a enviar"
-              required
-            />
-          </div>
+          <SelectField icon={<FiDollarSign />} name="moneda" value={formData.moneda} onChange={handleChange} options={{ USD: "USD - Dólar", EUR: "EUR - Euro", GTQ: "GTQ - Quetzal" }} />
+          <InputField icon={<FiDollarSign />} name="monto" value={formData.monto} onChange={handleChange} placeholder="Monto a enviar" required type="number" />
         </div>
 
-        {/* Concepto */}
-        <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-          <FiMessageSquare className="text-gray-400 mr-3" />
-          <input
-            type="text"
-            name="concepto"
-            value={formData.concepto}
-            onChange={handleChange}
-            className="w-full bg-transparent focus:outline-none text-white"
-            placeholder="Concepto (Opcional)"
-          />
-        </div>
+        <InputField icon={<FiMessageSquare />} name="concepto" value={formData.concepto} onChange={handleChange} placeholder="Concepto (Opcional)" />
 
-        {/* Botón de Enviar */}
         <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md flex items-center justify-center gap-2 mt-4">
           <FiSend size={20} />
           Enviar Dinero
         </button>
       </form>
+    </div>
+  );
+}
+
+function InputField({ icon, name, value, onChange, placeholder, required = false, type = "text" }) {
+  return (
+    <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
+      {icon}
+      <input type={type} name={name} value={value} onChange={onChange} className="w-full bg-transparent focus:outline-none text-white" placeholder={placeholder} required={required} />
+    </div>
+  );
+}
+
+function SelectField({ icon, name, value, onChange, options }) {
+  return (
+    <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
+      {icon}
+      <select name={name} value={value} onChange={onChange} className="w-full bg-transparent focus:outline-none text-white">
+        {Object.entries(options).map(([key, label]) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

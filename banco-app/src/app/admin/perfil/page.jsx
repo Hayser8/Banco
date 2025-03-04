@@ -27,8 +27,6 @@ export default function PerfilAdmin() {
       {/* Contenido según la pestaña activa */}
       <div className="mt-6">
         {activeTab === "info" && <ProfileInfo />}
-        {activeTab === "security" && <SecuritySettings />}
-        {activeTab === "preferences" && <Preferences />}
       </div>
     </div>
   );

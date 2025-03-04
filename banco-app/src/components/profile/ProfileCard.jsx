@@ -1,30 +1,43 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FiEdit3 } from "react-icons/fi";
 
 export default function ProfileCard() {
+  const [profile, setProfile] = useState({
+    nombre: "",
+    email: "",
+    rol: "",
+  });
+
+  useEffect(() => {
+    const usuario = localStorage.getItem("usuario");
+    if (!usuario) return;
+
+    fetch(`http://localhost:8080/perfil?nombre=${encodeURIComponent(usuario)}`)
+      .then(response => response.json())
+      .then(data => setProfile(data))
+      .catch(error => console.error("Error al obtener perfil:", error));
+  }, []);
+
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor flex items-center gap-6">
-      {/* Imagen de Perfil */}
       <div className="relative">
-        <Image
-          src="/profile-placeholder.jpg" // Cambia esto por una imagen real
+        <img
+          src="/perfiladmin.jpg"
           alt="Foto de Perfil"
           width={80}
           height={80}
           className="rounded-full border-2 border-primary"
         />
-        <button className="absolute bottom-0 right-0 bg-primary text-white p-1 rounded-full shadow-md hover:bg-blue-600 transition">
-          <FiEdit3 size={16} />
-        </button>
+     
       </div>
 
-      {/* Información Básica */}
       <div>
-        <h2 className="text-xl font-semibold">Admin Principal</h2>
-        <p className="text-textSecondary">admin@bancoapp.com</p>
-        <span className="text-green-400 text-sm">Administrador</span>
+        <h2 className="text-xl font-semibold">{profile.nombre || "Cargando..."}</h2>
+        <p className="text-textSecondary">{profile.email || "Cargando..."}</p>
+        <span className="text-green-400 text-sm">{profile.rol || "Cargando..."}</span>
       </div>
     </div>
   );

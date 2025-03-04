@@ -3,7 +3,6 @@ from neo4j import GraphDatabase, basic_auth
 
 login_router = APIRouter()
 
-
 DB_URI = "bolt://3.92.180.104:7687"
 DB_USER = "neo4j"
 DB_PASS = "prime-sponge-exhibit"
@@ -20,6 +19,9 @@ def login_cliente(nombre: str):
     Si el cliente es usuario normal, redirige a /user.
     Si el cliente no existe, retorna un error 404.
     """
+    if not nombre:
+        raise HTTPException(status_code=400, detail="Falta el parámetro 'nombre'.")
+
     with get_db_session() as session:
         query = """
             MATCH (c:Cliente {nombre: $nombre})
@@ -35,9 +37,8 @@ def login_cliente(nombre: str):
             return {
                 "message": "Login exitoso",
                 "redirect_to": redirect_to,
-                "usuario": usuario,  
-                "rol": rol  
+                "usuario": usuario,
+                "rol": rol
             }
         else:
             raise HTTPException(status_code=404, detail="Cliente no encontrado")
-

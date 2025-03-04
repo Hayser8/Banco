@@ -11,14 +11,28 @@ export default function HomePage() {
       .then(response => response.json())
       .then(data => {
         console.log("Datos recibidos:", data);
-        const formattedData = data.transacciones_ultima_semana.map(tx => ({
-          fecha: new Date(tx.fecha).toLocaleDateString("es-ES", { weekday: "short", day: "numeric" }),
-          monto: parseFloat(tx.monto),
-        }));
+        const formattedData = data.transacciones_ultima_semana
+          .map(tx => ({
+            fecha: new Date(tx.fecha),
+            monto: parseFloat(tx.monto),
+          }))
+          .sort((a, b) => a.fecha - b.fecha)  // 🔹 Ordenar las fechas por si acaso
+          .map(tx => ({
+            fecha: tx.fecha.toLocaleDateString("es-ES", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              year: "numeric"
+            }),
+            monto: tx.monto,
+          }));
+  
         setTransacciones(formattedData);
       })
       .catch(error => console.error("Error al obtener transacciones:", error));
   }, []);
+  
+  
 
   const maxMonto = Math.max(...transacciones.map(t => t.monto), 0);
   const minMonto = Math.min(...transacciones.map(t => t.monto), 0);
