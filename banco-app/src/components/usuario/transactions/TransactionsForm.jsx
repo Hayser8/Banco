@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { FiUser, FiDollarSign, FiMessageSquare, FiSend, FiGlobe, FiTag, FiCreditCard } from "react-icons/fi";
+import { FiUser, FiDollarSign, FiMessageSquare, FiSend, FiGlobe, FiTag, FiCreditCard, FiHash } from "react-icons/fi";
 
-export default function TransactionsForm({ setTransactionStatus }) {
+export default function TransactionsForm({ setTransactionStatus, saldoDisponible, setSaldoDisponible }) {
   const [formData, setFormData] = useState({
     destinatario: "",
+    numeroCuenta: "",
     alias: "",
     tipoCuenta: "corriente",
     moneda: "USD",
@@ -20,12 +21,19 @@ export default function TransactionsForm({ setTransactionStatus }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const monto = parseFloat(formData.monto);
 
-    if (!formData.destinatario || !formData.monto || isNaN(formData.monto) || formData.monto <= 0) {
+    if (!formData.destinatario || !formData.numeroCuenta || isNaN(monto) || monto <= 0) {
       setTransactionStatus("error");
       return;
     }
 
+    if (monto > saldoDisponible) {
+      setTransactionStatus("insufficient-funds");
+      return;
+    }
+
+    setSaldoDisponible((prevSaldo) => prevSaldo - monto);
     setTransactionStatus("success");
   };
 
@@ -33,7 +41,6 @@ export default function TransactionsForm({ setTransactionStatus }) {
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
       <h3 className="text-xl font-semibold mb-4 text-white text-center">Realizar Pago 💸</h3>
       <form className="space-y-6" onSubmit={handleSubmit}>
-        {/* Sección Principal */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Destinatario */}
           <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
@@ -45,21 +52,36 @@ export default function TransactionsForm({ setTransactionStatus }) {
               onChange={handleChange}
               className="w-full bg-transparent focus:outline-none text-white"
               placeholder="Cuenta o Correo"
+              required
             />
           </div>
 
-          {/* Alias */}
+          {/* Número de Cuenta */}
           <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
-            <FiTag className="text-gray-400 mr-3" />
+            <FiHash className="text-gray-400 mr-3" />
             <input
               type="text"
-              name="alias"
-              value={formData.alias}
+              name="numeroCuenta"
+              value={formData.numeroCuenta}
               onChange={handleChange}
               className="w-full bg-transparent focus:outline-none text-white"
-              placeholder="Alias del destinatario (Opcional)"
+              placeholder="Número de Cuenta"
+              required
             />
           </div>
+        </div>
+
+        {/* Alias */}
+        <div className="flex items-center border border-gray-600 rounded-md p-3 bg-gray-900">
+          <FiTag className="text-gray-400 mr-3" />
+          <input
+            type="text"
+            name="alias"
+            value={formData.alias}
+            onChange={handleChange}
+            className="w-full bg-transparent focus:outline-none text-white"
+            placeholder="Alias del destinatario (Opcional)"
+          />
         </div>
 
         {/* Tipo de Cuenta y País */}
@@ -122,6 +144,7 @@ export default function TransactionsForm({ setTransactionStatus }) {
               onChange={handleChange}
               className="w-full bg-transparent focus:outline-none text-white"
               placeholder="Monto a enviar"
+              required
             />
           </div>
         </div>

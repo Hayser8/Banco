@@ -1,14 +1,22 @@
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
-// Datos de fraudes por monto (simulado)
-const data = [
-  { monto: "< $500", fraudes: 10 },
-  { monto: "$500 - $1000", fraudes: 25 },
-  { monto: "$1000 - $5000", fraudes: 40 },
-  { monto: "$5000+", fraudes: 15 },
-];
-
 export default function FraudAmountChart() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("http://localhost:8080/data_insights/fraud_amount");
+        const result = await response.json();
+        setData(result.data);
+      } catch (error) {
+        console.error("Error al obtener fraudes por monto:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor">
       <h3 className="text-xl font-semibold mb-4">Fraudes Detectados por Monto</h3>

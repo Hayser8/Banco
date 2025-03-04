@@ -1,17 +1,22 @@
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
-// Datos de fraudes por día (simulado)
-const data = [
-  { dia: "Lun", fraudes: 12 },
-  { dia: "Mar", fraudes: 20 },
-  { dia: "Mié", fraudes: 18 },
-  { dia: "Jue", fraudes: 25 },
-  { dia: "Vie", fraudes: 30 },
-  { dia: "Sáb", fraudes: 15 },
-  { dia: "Dom", fraudes: 10 },
-];
-
 export default function FraudTimeChart() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("http://localhost:8080/data_insights/fraud_day");
+        const result = await response.json();
+        setData(result.data);
+      } catch (error) {
+        console.error("Error al obtener fraudes por día:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor">
       <h3 className="text-xl font-semibold mb-4">Fraudes Detectados por Día de la Semana</h3>

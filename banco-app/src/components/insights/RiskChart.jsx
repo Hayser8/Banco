@@ -1,15 +1,22 @@
+import { useState, useEffect } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
-// Datos de riesgo por usuario (simulado)
-const data = [
-  { usuario: "User A", riesgo: 90 },
-  { usuario: "User B", riesgo: 75 },
-  { usuario: "User C", riesgo: 60 },
-  { usuario: "User D", riesgo: 40 },
-  { usuario: "User E", riesgo: 20 },
-];
-
 export default function RiskChart() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("http://localhost:8080/data_insights/risk_chart");
+        const result = await response.json();
+        setData(result.data);
+      } catch (error) {
+        console.error("Error al obtener datos de riesgo:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="bg-card p-6 rounded-lg shadow-md border border-borderColor">
       <h3 className="text-xl font-semibold mb-4">Riesgo Acumulado por Usuario</h3>

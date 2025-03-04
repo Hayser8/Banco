@@ -31,11 +31,12 @@ def shutdown_event():
 def get_transacciones():
     cypher_query = """
     MATCH (t:Transaccion)
+    WHERE datetime(t.fecha_hora) >= datetime() - duration('P7D')
     RETURN t.fecha_hora AS fecha, t.monto AS monto
     """
     with driver.session(database="neo4j") as session:
         results = session.run(cypher_query).data()
-    return {"transacciones": results}
+    return {"transacciones_ultima_semana": results}
 
 app.include_router(dashboard_router)
 app.include_router(historial_router)
