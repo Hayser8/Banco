@@ -46,7 +46,6 @@ export default function TransactionsFilters({ transactions, setFilteredTransacti
         <option value="">Todos los estados</option>
         <option value="exitosa">Exitosa</option>
         <option value="pendiente">Pendiente</option>
-        <option value="fraudulenta">Fraudulenta</option>
         <option value="fallida">Fallida</option>
       </select>
 
