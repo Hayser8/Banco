@@ -1,19 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation"; // Para manejar la redirección en Next.js
+import { useRouter } from "next/navigation";
 import "../styles/globals.css";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter(); // Hook para redirección
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     if (!username.trim()) {
       setError("Por favor, ingresa tu nombre de usuario.");
       return;
@@ -22,11 +22,13 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8080/login?nombre=${username}`);
+      const response = await fetch(`http://localhost:8080/login?nombre=${username}`);
       const data = await response.json();
 
       if (response.ok) {
-        alert(`Bienvenido, ${username}! Redirigiendo...`);
+        localStorage.setItem("usuario", data.usuario);
+        localStorage.setItem("rol", data.rol);
+        alert(`Bienvenido, ${data.usuario}! Redirigiendo...`);
         router.push(data.redirect_to); // Redirigir según el rol
       } else {
         setError(data.detail || "Error al iniciar sesión. Inténtalo de nuevo.");
