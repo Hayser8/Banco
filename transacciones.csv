@@ -1,0 +1,6 @@
+id_transaccion,monto,fecha_hora,tipo,estado,ubicacion,num_cuent_origen,num_cuent_destino,pais_origen,pais_destino,moneda,banco_destino
+ddf238a0-0cb2-4056-a69c-c6029f4ba916,128.06,2024-10-14T20:53:57,Compra,fallida,Ciudad_48,9645458883,6283909307,País_B,País_A,USD,Banco Y
+7f386110-eaf0-4e7d-8a52-737258f0c9f6,414.56,2024-11-10T08:08:46,Compra,exitosa,Ciudad_41,6283909307,8995609705,País_A,País_B,MXN,Banco Z
+2b18e748-d75a-4a01-b00b-cc0385ec2170,190.65,2024-09-17T01:51:34,Compra,pendiente,Ciudad_22,7821152430,5753108417,País_B,País_A,EUR,Banco X
+0b2a0ab0-0656-4f18-83eb-65c09d796d9c,352.4,2025-01-19T03:28:13,Transferencia,fallida,Ciudad_66,8995609705,7821152430,País_B,País_B,USD,Banco X
+6800f522-1234-4e94-8067-009ed39d37af,104.14,2025-03-01T00:23:35,Transferencia,fallida,Ciudad_46,5753108417,6283909307,País_B,País_A,MXN,Banco Z

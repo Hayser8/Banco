@@ -1,0 +1,6 @@
+id_tarjeta,tipo_tarjeta,limite_credito,estatus,fecha_vencimiento,numero_tarjeta,emisor
+e7ded3cf-4473-4362-859a-4afbcf7b3de5,Débito,3632,true,2026-02-09,4140546777299433,Banco B
+c83d16b0-4089-4916-9a70-ba6c34deee93,Crédito,6450,false,2025-10-26,4798178213992784,Banco B
+ac570584-961e-4ebe-8d30-6d6cac03eae6,Crédito,6667,false,2027-08-31,4982898198545057,Banco A
+1d667516-ca85-4a16-95e0-5c7bc60d4fcd,Crédito,3394,false,2025-10-24,4663221588333516,Banco C
+a36cd5d4-9d43-4fc4-addc-f71f6ecaeb75,Débito,1870,true,2025-10-19,4532657319897031,Banco A

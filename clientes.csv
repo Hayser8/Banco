@@ -1,0 +1,6 @@
+id,nombre,fecha_nacimiento,email,telefono,direcciones,riesgo_acumulado,rol
+4d1fb455-2132-4a09-bb29-75adca920782,Jose,1971-06-10,jose@mail.com,+61-763-2042491,"[""Calle Falsa 34""]",88.42,regular
+085753b6-59e8-418f-95d1-745fe061b4cc,Selmer,1951-10-19,selmer@test.org,+67-817-1582391,"[""Calle del Sol 386""]",77.07,regular
+e2a74214-c66f-4bd1-b1fd-438b4c9b1234,Cami,1978-02-07,cami@example.com,+43-695-1995970,"[""Av. Siempre Viva 466""]",79.99,regular
+e084d7b9-8835-4f38-b226-0283f7069d8a,Jeova,1997-03-21,jeova@test.org,+25-828-1273201,"[""Calle Falsa 498""]",47.63,regular
+bf18f1fb-3f35-4cdd-942c-c869324d8bbe,Clarkson,1952-07-05,clarkson@mail.com,+31-394-8198255,"[""Av. Los Pinos 958""]",33.64,regular

@@ -1,0 +1,6 @@
+id_dispositivo,tipo_dispositivo,ubicacion,estatus_riesgo
+816bfc0c-fb7f-4074-b453-86e1204e23a8,Tablet,Ciudad_14,true
+02fd3b8c-4f07-46e1-9985-dcc6fcdd9708,Móvil,Ciudad_41,true
+4b9bf3c7-e711-4c19-a7fd-4365ee43b177,PC,Ciudad_13,false
+abd16e06-58e5-4cf2-9648-bd9bd4ff6d47,Móvil,Ciudad_44,false
+28ec5499-af14-4c23-a6b4-cc8ea8a00098,Tablet,Ciudad_61,true
