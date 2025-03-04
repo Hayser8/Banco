@@ -8,6 +8,7 @@ from admin.alerts.service import alerts_router
 from admin.alerts.alerts_generationservice import generate_alerts_router
 from admin.alerts.notifications_todayservice import notifications_today_router
 from admin.datascience.service import data_insights_router
+from login.service import login_router
 
 app = FastAPI()
 
@@ -44,6 +45,7 @@ app.include_router(alerts_router)
 app.include_router(data_insights_router)
 app.include_router(generate_alerts_router)     
 app.include_router(notifications_today_router)
+app.include_router(login_router)
 
 if __name__ == "__main__":
     import uvicorn
