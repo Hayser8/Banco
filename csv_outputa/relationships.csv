@@ -1,0 +1,9 @@
+:START_ID,:END_ID,:TYPE,frecuencia_uso,ubicaciones_frecuentes,estatus_riesgo,fecha_apertura,estatus_actual,saldo_promedio,canal,comentario,rol,tipo_pago,estatus_fraude,razon_fraude,evidencia,acciones_tomadas,motivo_alerta,nivel_riesgo,accion_inicial,direccion_ip,tipo_conexion,banco_emisor,transacciones_totales,linked_date,canal_uso
+D1,DX1,Cliente_usa_Dispositivo,30,New York,0.5,,,,,,,,,,,,,,,,,,,,
+D2,DX2,Cliente_usa_Dispositivo,40,Los Angeles,0.7,,,,,,,,,,,,,,,,,,,,
+D1,C1,CLIENTE_POSEE_CUENTA,,2025-03-01,Activa,,,,,,,,,,,,,,,,,,,,
+D2,C2,CLIENTE_POSEE_CUENTA,,2025-03-02,Activa,,,,,,,,,,,,,,,,,,,,
+C1,T1,CUENTA_REALIZA_TRANSACCION,,,,,,,,,,,,,,,,,,,,,,,
+C1,T2,CUENTA_REALIZA_TRANSACCION,,,,,,,,,,,,,,,,,,,,,,,
+C2,T3,CUENTA_REALIZA_TRANSACCION,,,,,,,,,,,,,,,,,,,,,,,
+C2,T4,CUENTA_REALIZA_TRANSACCION,,,,,,,,,,,,,,,,,,,,,,,

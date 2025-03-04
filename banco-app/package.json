@@ -11,6 +11,8 @@
   "dependencies": {
     "cytoscape": "^3.31.1",
     "cytoscape-cola": "^2.5.1",
+    "fastapi": "^0.0.8",
+    "neo4j": "^2.0.0-RC2",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-cytoscapejs": "^2.0.0",

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from typing import Optional
 from neo4j import GraphDatabase, basic_auth
+from datetime import datetime
 
 historial_router = APIRouter()
 
@@ -12,8 +13,8 @@ def get_transacciones(
 ):
 
     driver = GraphDatabase.driver(
-        "bolt://3.92.180.104:7687",
-        auth=basic_auth("neo4j", "prime-sponge-exhibit")
+        "bolt://44.204.125.164",
+        auth=basic_auth("neo4j", "regrets-plates-break")
     )
 
     with driver.session(database="neo4j") as session:
@@ -41,7 +42,6 @@ def get_transacciones(
             """
             params["search"] = search
 
-
         query += """
             WITH tx, c, collect(a) AS alerts
             RETURN
@@ -57,10 +57,24 @@ def get_transacciones(
         results = session.run(query, params)
         data = []
         for record in results:
+            fecha_value = record["fecha"]
+            fecha_formatted = None
+            if fecha_value:
+                try:
+                    # Si el valor ya posee isoformat, se asume que es un objeto datetime o similar
+                    if hasattr(fecha_value, "isoformat"):
+                        fecha_formatted = fecha_value.isoformat()
+                    else:
+                        # Intentamos convertirlo asumiendo que es un string en formato ISO
+                        fecha_dt = datetime.fromisoformat(fecha_value)
+                        fecha_formatted = fecha_dt.isoformat()
+                except Exception as e:
+                    # Si falla la conversión, dejamos el string original
+                    fecha_formatted = str(fecha_value)
             data.append({
                 "transaccion_id": record["transaccion_id"],
                 "cliente": record["cliente"],
-                "fecha": record["fecha"].isoformat() if record["fecha"] else None,
+                "fecha": fecha_formatted,
                 "monto": record["monto"],
                 "estado": record["estado"],
                 "es_fraudulenta": record["es_fraudulenta"]

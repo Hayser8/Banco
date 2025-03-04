@@ -4,8 +4,8 @@ from datetime import datetime
 
 data_insights_router = APIRouter()
 
-URI = "bolt://3.92.180.104:7687"
-AUTH = basic_auth("neo4j", "prime-sponge-exhibit")
+URI = "bolt://44.204.125.164"
+AUTH = basic_auth("neo4j", "regrets-plates-break")
 
 @data_insights_router.get("/data_insights/fraud_amount")
 def get_fraud_by_amount():

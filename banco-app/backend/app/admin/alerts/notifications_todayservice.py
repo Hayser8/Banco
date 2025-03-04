@@ -3,8 +3,8 @@ from neo4j import GraphDatabase, basic_auth
 
 notifications_today_router = APIRouter()
 
-URI = "bolt://3.92.180.104:7687"
-AUTH = basic_auth("neo4j", "prime-sponge-exhibit")
+URI = "bolt://44.204.125.164"
+AUTH = basic_auth("neo4j", "regrets-plates-break")
 
 @notifications_today_router.get("/notifications/today")
 def get_today_notifications():
@@ -15,7 +15,7 @@ def get_today_notifications():
             MATCH (a:Alerta)
             WHERE a.resuelta=false
               AND a.vista=false
-              AND date(a.fecha_creacion)=date()
+              AND datetime(a.fecha_creacion)=datetime()
             RETURN 
               a.id_alerta AS id_alerta,
               a.descripcion AS descripcion,
@@ -54,7 +54,7 @@ def get_today_notifications_count():
             MATCH (a:Alerta)
             WHERE a.resuelta=false
               AND a.vista=false
-              AND date(a.fecha_creacion)=date()
+              AND datetime(a.fecha_creacion)=datetime()
             RETURN count(a) AS total
             """
             result = session.run(query).single()

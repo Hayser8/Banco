@@ -3,9 +3,9 @@ from neo4j import GraphDatabase, basic_auth
 
 login_router = APIRouter()
 
-DB_URI = "bolt://3.92.180.104:7687"
+DB_URI = "bolt://44.204.125.164"
 DB_USER = "neo4j"
-DB_PASS = "prime-sponge-exhibit"
+DB_PASS = "regrets-plates-break"
 
 def get_db_session():
     driver = GraphDatabase.driver(DB_URI, auth=basic_auth(DB_USER, DB_PASS))

@@ -1,0 +1,13 @@
+id:ID,:LABEL,nombre,fecha_nacimiento,email,telefono,direcciones,riesgo_acumulado,rol,tipo_tarjeta,limite_credito,estatus,fecha_vencimiento,numero_tarjeta,emisor,descripcion,fecha_creacion,nivel_severidad,resuelta,fraude_confirmado,id_comercio,nombre_comercio,categoria,ubicacion_comercio,reputacion,monto,fecha_hora,tipo,estado,ubicacion_transaccion,num_cuent_origen,num_cuent_destino,pais_origen,pais_destino,moneda,banco_destino,tipo,saldo_actual,fecha_creacion,estatus,moneda,saldo_minimo,tipo_dispositivo,ubicacion_dispositivo,estatus_riesgo
+D1,Cliente,John Doe,18/04/1955,john.doe.7274@test.org,555-3196,6671 Random St,3.9,regular,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+D2,Cliente,Jane Smith,25/06/1994,jane.smith.4471@gmail.com,555-7611,9981 Random St,0.79,regular,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+CO12,Comercio,SuperMart,,,,,,,,,,,,,,,,,,comercio_supermart,SuperMart,Electronics,New York,4.0,,,,,,,,,,,,,,,,,,,,
+CO22,Comercio,TechShop,,,,,,,,,,,,,,,,,,comercio_techshop,TechShop,Retail,New York,4.5,,,,,,,,,,,,,,,,,,,,
+DX1,Dispositivo,Laptop,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Laptop,New York,True
+DX2,Dispositivo,Smartphone,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Smartphone,San Francisco,True
+C1,Cuenta,CuentaPersonal,,,,,,,,,Activa,,,,,2025-01-10,,,,,,,,,,,cheques,,,,,,,MXN,,cheques,2455.59,2025-01-10,Activa,MXN,81.34,,,
+C2,Cuenta,CuentaEmpresarial,,,,,,,,,Activa,,,,,2025-01-10,,,,,,,,,,,ahorros,,,,,,,USD,,ahorros,728.65,2025-01-10,Activa,USD,71.63,,,
+T1,Transaccion,Transaccion_1,,,,,,,,,,,,,,,,,,,,,,,37.15,2025-03-04T11:48:42,Deposito,COMPLETADA,App,999999,888888,País_A,País_B,USD,Banco Z,Deposito,,,,USD,,,,
+T2,Transaccion,Transaccion_2,,,,,,,,,,,,,,,,,,,,,,,227.76,2025-03-04T12:24:07,Retiro,COMPLETADA,Store,999999,888888,País_A,País_B,USD,Banco Z,Retiro,,,,USD,,,,
+T3,Transaccion,Transaccion_3,,,,,,,,,,,,,,,,,,,,,,,238.06,2025-03-04T00:08:04,Retiro,PENDIENTE,Store,999999,888888,País_A,País_B,USD,Banco Z,Retiro,,,,USD,,,,
+T4,Transaccion,Transaccion_4,,,,,,,,,,,,,,,,,,,,,,,343.36,2025-03-04T20:58:51,Compra,PENDIENTE,Store,999999,888888,País_A,País_B,USD,Banco Z,Compra,,,,USD,,,,

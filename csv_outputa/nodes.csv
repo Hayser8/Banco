@@ -1,0 +1,13 @@
+id:ID,:LABEL,nombre,fecha_nacimiento,email,telefono,direcciones,riesgo_acumulado,rol,tipo_tarjeta,limite_credito,estatus,fecha_vencimiento,numero_tarjeta,emisor,descripcion_alerta,fecha_creacion_alerta,nivel_severidad_alerta,resuelta_alerta,fraude_confirmado_alerta,nombre_comercio,categoria_comercio,ubicacion_comercio,reputacion_comercio,monto_transaccion,fecha_hora_transaccion,tipo_transaccion,estado_transaccion,ubicacion_transaccion,num_cuenta_origen,num_cuenta_destino,pais_origen,pais_destino,moneda_transaccion,banco_destino,tipo_cuenta,saldo_actual,fecha_creacion_cuenta,estatus_cuenta,moneda_cuenta,saldo_minimo,tipo_dispositivo,ubicacion_dispositivo,estatus_riesgo_dispositivo
+D1,Cliente,John Doe,13/10/1976,john.doe.147@yahoo.com,555-7599,2794 Random St,1.05,regular,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+D2,Cliente,Jane Smith,18/09/1954,jane.smith.7518@example.com,555-3549,6055 Random St,1.18,regular,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+CO12,Comercio,SuperMart,,,,,,,,,,,,,,,,,,comercio_supermart,Food,Los Angeles,2.9,,,,,,,,,,,,,,,,,,,,
+CO22,Comercio,TechShop,,,,,,,,,,,,,,,,,,comercio_techshop,Retail,Los Angeles,2.3,,,,,,,,,,,,,,,,,,,,
+DX1,Dispositivo,Laptop,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Laptop,,
+DX2,Dispositivo,Smartphone,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Smartphone,,
+C1,Cuenta,CuentaPersonal,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,cheques,367.48,2025-01-10,Activa,USD,386.53,,,
+C2,Cuenta,CuentaEmpresarial,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,cheques,289.43,2025-01-10,Activa,USD,236.71,,,
+T1,Transaccion,Transaccion_1,,,,,,,,,,,,,,,,,,,,,,448.47,2025-03-04T03:03:51,Deposito,PENDIENTE,Online,,,,,,,,,,,,,,,
+T2,Transaccion,Transaccion_2,,,,,,,,,,,,,,,,,,,,,,419.49,2025-03-04T21:13:08,Compra,PENDIENTE,Store,,,,,,,,,,,,,,,
+T3,Transaccion,Transaccion_3,,,,,,,,,,,,,,,,,,,,,,77.39,2025-03-04T14:14:54,Deposito,COMPLETADA,Store,,,,,,,,,,,,,,,
+T4,Transaccion,Transaccion_4,,,,,,,,,,,,,,,,,,,,,,108.99,2025-03-04T00:09:14,Retiro,COMPLETADA,Store,,,,,,,,,,,,,,,

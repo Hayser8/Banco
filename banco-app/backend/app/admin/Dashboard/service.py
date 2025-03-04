@@ -3,8 +3,8 @@ from neo4j import GraphDatabase, basic_auth
 
 dashboard_router = APIRouter()
 
-URI = "bolt://3.92.180.104:7687"
-AUTH = basic_auth("neo4j", "prime-sponge-exhibit")
+URI = "bolt://44.204.125.164"
+AUTH = basic_auth("neo4j", "regrets-plates-break")
 
 @dashboard_router.get("/general_metrics")
 def get_general_metrics(days: int = None):

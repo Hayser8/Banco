@@ -1,3 +1,5 @@
+import uuid
+import re
 from fastapi import APIRouter, File, UploadFile, HTTPException
 import pandas as pd
 from neo4j import GraphDatabase, basic_auth
@@ -6,9 +8,9 @@ import io
 # Crear el router para la carga de CSV
 csv_router = APIRouter(tags=["CSV Upload"])
 
-DB_URI = "bolt://3.92.180.104:7687"
+DB_URI = "bolt://44.204.125.164"
 DB_USER = "neo4j"
-DB_PASS = "prime-sponge-exhibit"
+DB_PASS = "regrets-plates-break"
 
 def get_db_session():
     driver = GraphDatabase.driver(DB_URI, auth=basic_auth(DB_USER, DB_PASS))
@@ -104,69 +106,148 @@ def validate_csv(file: UploadFile, expected_columns):
     except Exception as e:
         return False, f"Error al procesar CSV: {str(e)}"
 
-def insert_data_to_neo4j(nodes_df, relationships_df):
-    with get_db_session() as session:
-        # Insertar nodos
-        csvId_to_uuid = {}
 
+def looks_like_uuid(value: str) -> bool:
+    """
+    Retorna True si 'value' cumple un patrón básico de UUID:
+    8-4-4-4-12 = 36 chars, con guiones.
+    """
+    pattern = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    return bool(pattern.match(value))
+
+
+def insert_data_to_neo4j(nodes_df, relationships_df):
+    """
+    Unifica TODOS los nodos en la propiedad n.uuid, generando un nuevo UUID para IDs 'nuevos'
+    (p.e. 'T4'), y usando el UUID directamente si el CSV ya trae un ID con formato UUID.
+    Se mapean los nombres de las propiedades de acuerdo a los nombres correctos de los JSON.
+    
+    - Para nodos de tipo Transaccion:
+      * Almacena en 'id_transaccion' el UUID final (no el 'T4').
+      * Convierte el 'estado' a minúsculas.
+    """
+
+    csv_to_uuid_map = {}
+
+    header_mapping = {
+        "descripcion_alerta": "descripcion",
+        "fecha_creacion_alerta": "fecha_creacion",
+        "nivel_severidad_alerta": "nivel_severidad",
+        "resuelta_alerta": "resuelta",
+        "fraude_confirmado_alerta": "fraude_confirmado",
+        "nombre_comercio": "nombre",
+        "categoria_comercio": "categoria",
+        "ubicacion_comercio": "ubicacion",
+        "reputacion_comercio": "reputacion",
+        "monto_transaccion": "monto",
+        "fecha_hora_transaccion": "fecha_hora",
+        "tipo_transaccion": "tipo",
+        "estado_transaccion": "estado",
+        "ubicacion_transaccion": "ubicacion",
+        "num_cuenta_origen": "num_cuent_origen",
+        "num_cuenta_destino": "num_cuent_destino",
+        "moneda_transaccion": "moneda",
+        "tipo_cuenta": "tipo",
+        "fecha_creacion_cuenta": "fecha_creacion",
+        "estatus_cuenta": "estatus",
+        "moneda_cuenta": "moneda",
+        "ubicacion_dispositivo": "ubicacion",
+        "estatus_riesgo_dispositivo": "estatus_riesgo"
+    }
+
+    with get_db_session() as session:
+        # -------------------- (A) Insertar nodos --------------------
         for _, row in nodes_df.iterrows():
-            csv_id = str(row["id:ID"]).strip()
+            raw_csv_id = str(row["id:ID"]).strip()
             label = row[":LABEL"].replace(" ", "_")
 
+            # 1) Generar/usar UUID para la propiedad n.uuid
+            if looks_like_uuid(raw_csv_id):
+                final_uuid = raw_csv_id
+            else:
+                # Genera un nuevo UUID real si el CSV no trae uno válido
+                final_uuid = str(uuid.uuid4())
+
+            csv_to_uuid_map[raw_csv_id] = final_uuid
+
+            # 2) Extraer propiedades
             properties = {k: v for k, v in row.items() if pd.notna(v)}
             properties.pop("id:ID", None)
             properties.pop(":LABEL", None)
+            properties.pop("id", None)  # Evitar colisión con 'id'
 
-            # MERGE usando csv_id como identificador "real"
+            # 3) Mapear propiedades al nombre correcto
+            mapped_properties = {}
+            for key, value in properties.items():
+                if key in header_mapping:
+                    mapped_properties[header_mapping[key]] = value
+                else:
+                    mapped_properties[key] = value
+
+            # 4) Ajustes especiales para nodos de tipo Transaccion
+            if label == "Transaccion":
+                # Guardar en id_transaccion el UUID final
+                mapped_properties["id_transaccion"] = final_uuid
+
+                # Convertir estado a minúsculas (si existe)
+                if "estado" in mapped_properties and mapped_properties["estado"]:
+                    mapped_properties["estado"] = mapped_properties["estado"].lower()
+
+            # 5) Insertar el nodo con MERGE
             cypher = f"""
-                MERGE (n:{label} {{ csv_id: $csv_id }})
-                ON CREATE SET n += $props
-                RETURN n.csv_id AS realId
+            MERGE (n:{label} {{ uuid: $final_uuid }})
+            ON CREATE SET n += $props
+            RETURN n.uuid AS createdUuid
             """
-            result = session.run(cypher, csv_id=csv_id, props=properties)
+            result = session.run(cypher, final_uuid=final_uuid, props=mapped_properties)
             record = result.single()
 
-            # 'realId' será igual a tu csv_id (p.ej 'D1', 'CO12', etc.)
-            if record and record["realId"]:
-                csvId_to_uuid[csv_id] = record["realId"]  # en realidad guardamos el mismo
-                print(f"Nodo insertado: csv_id={csv_id} => realId={record['realId']}")
+            if record and record["createdUuid"]:
+                print(f"✅ Nodo insertado: CSV_ID={raw_csv_id} => uuid={record['createdUuid']} (label={label})")
             else:
-                print(f"⚠️ No se pudo insertar el nodo: csv_id={csv_id}")
+                print(f"⚠️ No se pudo crear nodo para {raw_csv_id}")
 
-        # Insertar relaciones
+        # -------------------- (B) Insertar relaciones --------------------
         for _, row in relationships_df.iterrows():
-            start_csv_id = str(row[":START_ID"]).strip()
-            end_csv_id   = str(row[":END_ID"]).strip()
-            rel_type     = str(row[":TYPE"]).strip().replace(" ", "_")
+            start_raw = str(row[":START_ID"]).strip()
+            end_raw   = str(row[":END_ID"]).strip()
+            rel_type  = str(row[":TYPE"]).strip().replace(" ", "_")
 
-            start_real_id = csvId_to_uuid.get(start_csv_id)
-            end_real_id   = csvId_to_uuid.get(end_csv_id)
+            rel_props = {k: v for k, v in row.items() if pd.notna(v)}
+            rel_props.pop(":START_ID", None)
+            rel_props.pop(":END_ID", None)
+            rel_props.pop(":TYPE", None)
 
-            if not start_real_id or not end_real_id:
-                print(f"❌ No tengo real_id para {start_csv_id} o {end_csv_id}")
+            # Recuperar los uuid
+            start_uuid = csv_to_uuid_map.get(start_raw)
+            end_uuid = csv_to_uuid_map.get(end_raw)
+
+            if not start_uuid:
+                print(f"❌ No tengo uuid para {start_raw}")
+                continue
+            if not end_uuid:
+                print(f"❌ No tengo uuid para {end_raw}")
                 continue
 
-            rel_properties = {k: v for k, v in row.items() if pd.notna(v)}
-            rel_properties.pop(":START_ID", None)
-            rel_properties.pop(":END_ID", None)
-            rel_properties.pop(":TYPE", None)
-
-            # Creas la relación usando la misma property 'csv_id'
             cypher = f"""
-                MATCH (a {{ csv_id: $start_id }}), (b {{ csv_id: $end_id }})
-                MERGE (a)-[r:{rel_type}]->(b)
-                ON CREATE SET r += $rel_props
-                RETURN type(r) AS createdRel
+            MATCH (a {{ uuid: $start_uuid }}), (b {{ uuid: $end_uuid }})
+            MERGE (a)-[r:{rel_type}]->(b)
+            ON CREATE SET r += $rel_props
+            RETURN type(r) AS createdRel
             """
             result = session.run(
                 cypher,
-                start_id=start_real_id,
-                end_id=end_real_id,
-                rel_props=rel_properties
+                start_uuid=start_uuid,
+                end_uuid=end_uuid,
+                rel_props=rel_props
             )
             record = result.single()
+
             if record and record["createdRel"]:
-                print(f"Relación creada: {start_csv_id} -[{rel_type}]-> {end_csv_id}")
+                print(f"✅ Relación creada: {start_raw} -[{rel_type}]-> {end_raw}")
+            else:
+                print(f"⚠️ No se pudo crear relacion: {start_raw} -[{rel_type}]-> {end_raw}")
+
 
 
 

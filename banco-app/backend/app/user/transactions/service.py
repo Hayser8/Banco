@@ -6,9 +6,9 @@ from pydantic import BaseModel
 
 transaction_router = APIRouter()
 
-DB_URI = "bolt://3.92.180.104:7687"
+DB_URI = "bolt://44.204.125.164"
 DB_USER = "neo4j"
-DB_PASS = "prime-sponge-exhibit"
+DB_PASS = "regrets-plates-break"
 
 def get_db_session():
     """
