@@ -13,7 +13,7 @@ from admin.profile.service import profile_router
 from admin.subir_csv.service import csv_router
 from login.service import login_router
 from user.service import user_router
-from user.transactions.service import transactions_router
+from user.transactions.service import transaction_router
 
 
 app = FastAPI()
@@ -44,14 +44,13 @@ def get_transacciones():
     with driver.session(database="neo4j") as session:
         results = session.run(cypher_query).data()
 
-    # Convertir las fechas de neo4j.time.DateTime a string ISO 8601
     for record in results:
-        if isinstance(record["fecha"], datetime):  # Si ya es un datetime de Python
+        if isinstance(record["fecha"], datetime): 
             record["fecha"] = record["fecha"].isoformat()
-        else:  # Si sigue siendo un objeto de neo4j, conviértelo manualmente
+        else:  
             record["fecha"] = str(record["fecha"])
 
-    print("Fechas convertidas:", results)  # 🔍 Verifica que las fechas se convierten correctamente
+
 
     return {"transacciones_ultima_semana": results}
 
@@ -65,7 +64,7 @@ app.include_router(profile_router)
 app.include_router(login_router)
 app.include_router(user_router)
 app.include_router(csv_router)
-app.include_router(transactions_router)
+app.include_router(transaction_router)
 
 
 if __name__ == "__main__":

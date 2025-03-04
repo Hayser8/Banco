@@ -1,13 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TransactionsForm from "../../../components/usuario/transactions/TransactionsForm.jsx";
 import TransactionStatus from "../../../components/usuario/transactions/TransactionStatus.jsx";
 import RecentTransactions from "../../../components/usuario/transactions/RecentTransactions.jsx";
 
 export default function Transacciones() {
   const [transactionStatus, setTransactionStatus] = useState(null);
-  const [saldoDisponible, setSaldoDisponible] = useState(1000.00); // Saldo inicial
+  const [saldoDisponible, setSaldoDisponible] = useState(1000.00); 
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      setCurrentUser(storedUser);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+    async function fetchSaldo() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/user/details?nombre=${encodeURIComponent(currentUser)}`
+        );
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setSaldoDisponible(data?.account?.saldo_actual ?? 0);
+      } catch (err) {
+        console.error("Error al obtener el saldo del usuario:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSaldo();
+  }, [currentUser]);
+
+  if (loading) {
+    return <div className="p-4">Cargando saldo...</div>;
+  }
+  if (error) {
+    return <div className="p-4 text-red-400">Error: {error}</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-10">

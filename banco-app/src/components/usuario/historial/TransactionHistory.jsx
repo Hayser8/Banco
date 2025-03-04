@@ -1,23 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { FiSearch, FiFilter, FiClock, FiCheckCircle, FiXCircle } from "react-icons/fi";
-
-const transactionsData = [
-  { id: "TXN001", fecha: "2024-02-20", monto: 200.00, estado: "Completada" },
-  { id: "TXN002", fecha: "2024-02-21", monto: 50.00, estado: "Pendiente" },
-  { id: "TXN003", fecha: "2024-02-22", monto: 120.00, estado: "Rechazada" },
-  { id: "TXN004", fecha: "2024-02-23", monto: 500.00, estado: "Completada" },
-];
+import { useState, useEffect } from "react";
+import { FiSearch, FiFilter, FiClock, FiCheckCircle, FiXCircle, FiArrowUpRight, FiArrowDownLeft } from "react-icons/fi";
 
 export default function TransactionHistory() {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const filteredTransactions = transactionsData.filter((txn) =>
-    (txn.id.includes(search) || txn.fecha.includes(search)) &&
-    (statusFilter === "all" || txn.estado === statusFilter)
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      setCurrentUser(storedUser);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+
+    async function fetchTransactions() {
+      try {
+        console.log("Fetching transactions for:", currentUser);
+
+        const response = await fetch(
+          `http://localhost:8080/user/transactions/full?nombre=${encodeURIComponent(currentUser)}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Transacciones recibidas:", data.transactions);
+
+        setTransactions(data.transactions || []);
+      } catch (err) {
+        console.error("Error al obtener transacciones:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTransactions();
+  }, [currentUser]);
+
+  const filteredTransactions = transactions.filter((txn) =>
+    (txn.id_transaccion.includes(search) || txn.fecha_hora.includes(search)) &&
+    (statusFilter === "all" || (txn.estado.toLowerCase() === statusFilter || (txn.estado === "Completada" && statusFilter === "exitosa")))
   );
+
+  if (loading) return <div className="text-white">Cargando transacciones...</div>;
+  if (error) return <div className="text-red-400">Error: {error}</div>;
 
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
@@ -46,9 +86,9 @@ export default function TransactionHistory() {
             className="w-full bg-transparent focus:outline-none text-white"
           >
             <option value="all">Todos</option>
-            <option value="Completada">Completadas</option>
-            <option value="Pendiente">Pendientes</option>
-            <option value="Rechazada">Rechazadas</option>
+            <option value="exitosa">Exitosas</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="fallida">Fallidas</option>
           </select>
         </div>
       </div>
@@ -61,32 +101,59 @@ export default function TransactionHistory() {
               <th className="py-3 px-4 text-left">ID</th>
               <th className="py-3 px-4 text-left">Fecha</th>
               <th className="py-3 px-4 text-left">Monto</th>
+              <th className="py-3 px-4 text-left">Tipo</th>
+              <th className="py-3 px-4 text-left">Destino/Remitente</th>
+              <th className="py-3 px-4 text-left">Concepto</th>
               <th className="py-3 px-4 text-left">Estado</th>
             </tr>
           </thead>
           <tbody>
-            {filteredTransactions.map((txn) => (
-              <tr key={txn.id} className="border-b border-gray-700">
-                <td className="py-3 px-4">{txn.id}</td>
-                <td className="py-3 px-4">{txn.fecha}</td>
-                <td className="py-3 px-4 text-blue-400">${txn.monto.toFixed(2)}</td>
-                <td className="py-3 px-4">
-                  {txn.estado === "Completada" ? (
-                    <span className="text-green-400 flex items-center">
-                      <FiCheckCircle className="mr-2" /> Completada
-                    </span>
-                  ) : txn.estado === "Pendiente" ? (
-                    <span className="text-yellow-400 flex items-center">
-                      <FiClock className="mr-2" /> Pendiente
-                    </span>
-                  ) : (
-                    <span className="text-red-400 flex items-center">
-                      <FiXCircle className="mr-2" /> Rechazada
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {filteredTransactions.map((txn) => {
+              const esEnvio = txn.tipo === "Enviado"; 
+              return (
+                <tr key={txn.id_transaccion} className="border-b border-gray-700">
+                  <td className="py-3 px-4">{txn.id_transaccion}</td>
+                  <td className="py-3 px-4">{new Date(txn.fecha_hora).toLocaleString()}</td>
+                  <td className="py-3 px-4 text-blue-400">${txn.monto.toFixed(2)}</td>
+
+                  {/* Indicar si es envío o recepción */}
+                  <td className="py-3 px-4">
+                    {esEnvio ? (
+                      <span className="text-red-400 flex items-center">
+                        <FiArrowUpRight className="mr-2" /> Enviado
+                      </span>
+                    ) : (
+                      <span className="text-green-400 flex items-center">
+                        <FiArrowDownLeft className="mr-2" /> Recibido
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Mostrar destinatario o remitente */}
+                  <td className="py-3 px-4">{esEnvio ? txn.cuenta_destino : txn.cuenta_origen}</td>
+
+                  {/* Mostrar concepto */}
+                  <td className="py-3 px-4">{txn.concepto || "Sin concepto"}</td>
+
+                  {/* Estado de la transacción */}
+                  <td className="py-3 px-4">
+                    {txn.estado === "Completada" || txn.estado.toLowerCase() === "exitosa" ? (
+                      <span className="text-green-400 flex items-center">
+                        <FiCheckCircle className="mr-2" /> Exitosa
+                      </span>
+                    ) : txn.estado.toLowerCase() === "pendiente" ? (
+                      <span className="text-yellow-400 flex items-center">
+                        <FiClock className="mr-2" /> Pendiente
+                      </span>
+                    ) : (
+                      <span className="text-red-400 flex items-center">
+                        <FiXCircle className="mr-2" /> Fallida
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

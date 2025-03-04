@@ -10,15 +10,13 @@ export default function UsuarioHome() {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Leer el usuario actual desde el localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("usuario"); // Cambio aquí
+    const storedUser = localStorage.getItem("usuario"); 
     if (storedUser) {
-      setCurrentUser(storedUser); // Ya es un string, no necesita JSON.parse
+      setCurrentUser(storedUser); 
     }
   }, []);
 
-  // Cuando se tiene el usuario, se hace fetch al backend para obtener su información
   useEffect(() => {
     if (!currentUser) {
       setLoading(false);
@@ -34,7 +32,6 @@ export default function UsuarioHome() {
         }
         const data = await response.json();
 
-        // Se actualiza el saldo y la última transacción
         setAccountBalance(data?.account?.saldo_actual ?? 0);
 
         if (data?.lastTransaction) {

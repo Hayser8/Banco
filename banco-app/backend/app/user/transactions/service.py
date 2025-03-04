@@ -1,108 +1,113 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from neo4j import GraphDatabase, basic_auth
-from pydantic import BaseModel
+import uuid
 from datetime import datetime
+from pydantic import BaseModel
 
-transactions_router = APIRouter()
+transaction_router = APIRouter()
 
-# Configuración de conexión a Neo4j
-URI = "bolt://3.92.180.104:7687"
-AUTH = basic_auth("neo4j", "prime-sponge-exhibit")
+DB_URI = "bolt://3.92.180.104:7687"
+DB_USER = "neo4j"
+DB_PASS = "prime-sponge-exhibit"
 
-# Modelo de datos para la transacción
-class Transaction(BaseModel):
-    usuario: str
-    destinatario: str
-    numeroCuenta: str
-    alias: str = None
-    tipoCuenta: str
-    moneda: str
+def get_db_session():
+    """
+    Crea y retorna una sesión con la base de datos Neo4j.
+    """
+    driver = GraphDatabase.driver(DB_URI, auth=basic_auth(DB_USER, DB_PASS))
+    return driver.session(database="neo4j")
+
+class TransactionRequest(BaseModel):
+    usuario: str 
+    numeroCuentaDestino: str
     monto: float
-    concepto: str = None
-    pais: str
+    moneda: str
+    concepto: str = ""
 
-@transactions_router.post("/transactions")
-def create_transaction(transaction: Transaction):
-    driver = GraphDatabase.driver(URI, auth=AUTH)
-    try:
-        with driver.session(database="neo4j") as session:
-            # Verificar si la cuenta del destinatario existe
-            cuenta_destino = session.run(
-                "MATCH (c:Cuenta {numero: $numeroCuenta}) RETURN c",
-                numeroCuenta=transaction.numeroCuenta
-            ).single()
+@transaction_router.post("/transactions")
+def make_transaction(data: TransactionRequest):
 
-            if not cuenta_destino:
-                raise HTTPException(status_code=404, detail="Cuenta no encontrada")
+    print(f"📥 Recibido: {data}") 
 
-            # Insertar la transacción en la base de datos
-            session.run(
-                """
-                MATCH (u:Cliente {nombre: $usuario})
-                MATCH (c:Cuenta {numero: $numeroCuenta})
-                CREATE (t:Transaccion {
-                    id_transaccion: apoc.create.uuid(),
-                    usuario: $usuario,
-                    destinatario: $destinatario,
-                    numeroCuenta: $numeroCuenta,
-                    alias: $alias,
-                    tipoCuenta: $tipoCuenta,
-                    moneda: $moneda,
-                    monto: $monto,
-                    concepto: $concepto,
-                    pais: $pais,
-                    fecha_hora: datetime()
-                })
-                MERGE (u)-[:REALIZÓ]->(t)
-                MERGE (t)-[:DESTINO]->(c)
-                """,
-                usuario=transaction.usuario,
-                destinatario=transaction.destinatario,
-                numeroCuenta=transaction.numeroCuenta,
-                alias=transaction.alias,
-                tipoCuenta=transaction.tipoCuenta,
-                moneda=transaction.moneda,
-                monto=transaction.monto,
-                concepto=transaction.concepto,
-                pais=transaction.pais
-            )
-        return {"message": "Transacción registrada exitosamente"}
-    finally:
-        driver.close()
+    if data.monto <= 0:
+        raise HTTPException(status_code=400, detail="El monto debe ser mayor a 0.")
 
-@transactions_router.get("/transactions/{usuario}")
-def get_user_transactions(usuario: str, limit: int = 5):
-    driver = GraphDatabase.driver(URI, auth=AUTH)
-    try:
-        with driver.session(database="neo4j") as session:
-            results = session.run(
-                """
-                MATCH (c:Cliente {nombre: $usuario})-[:CLIENTE_POSEE_CUENTA]->(cu:Cuenta)
-                MATCH (cu)-[:CUENTA_REALIZA_TRANSACCION]->(t:Transaccion)
-                OPTIONAL MATCH (t)-[:DESTINO]->(cu_destino:Cuenta)
-                OPTIONAL MATCH (cliente_destino:Cliente)-[:CLIENTE_POSEE_CUENTA]->(cu_destino)
-                RETURN t.id_transaccion AS id_transaccion, 
-                       COALESCE(cliente_destino.nombre, cu_destino.numero, t.destinatario) AS destinatario, 
-                       t.monto AS monto, 
-                       t.moneda AS moneda, 
-                       t.fecha_hora AS fecha
-                ORDER BY t.fecha_hora DESC
-                LIMIT $limit
-                """,
-                usuario=usuario,
-                limit=limit
-            )
-            transactions = [
-                {
-                    "id_transaccion": record["id_transaccion"],
-                    "destinatario": record["destinatario"] or "Desconocido",
-                    "monto": record["monto"],
-                    "moneda": record["moneda"],
-                    "fecha": record["fecha"].isoformat()
-                }
-                for record in results
-            ]
-        return {"transactions": transactions}
-    finally:
-        driver.close()
+    with get_db_session() as session:
+        query_get_account = """
+            MATCH (c:Cliente {nombre: $usuario})-[:CLIENTE_POSEE_CUENTA]->(cu:Cuenta)
+            RETURN cu.numero_cuenta AS numeroCuentaOrigen, cu.saldo_actual AS saldo_origen
+        """
+        user_account = session.run(query_get_account, {"usuario": data.usuario}).single()
 
+        if not user_account:
+            raise HTTPException(status_code=404, detail="No se encontró una cuenta asociada al usuario autenticado.")
+
+        numeroCuentaOrigen = user_account["numeroCuentaOrigen"]
+        saldo_origen = user_account["saldo_origen"]
+
+
+        query_check_destino = """
+            MATCH (cu_destino:Cuenta {numero_cuenta: $numeroCuentaDestino})
+            RETURN cu_destino.numero_cuenta AS cuenta_destino
+        """
+        destino = session.run(query_check_destino, {"numeroCuentaDestino": data.numeroCuentaDestino}).single()
+
+        if not destino:
+            raise HTTPException(status_code=404, detail="Cuenta destino no encontrada.")
+
+
+        if saldo_origen < data.monto:
+            raise HTTPException(status_code=400, detail="Saldo insuficiente en la cuenta de origen.")
+
+
+        transaction_id = str(uuid.uuid4())
+        fecha_hora_actual = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+
+        create_transaction_query = """
+            MATCH (cu_origen:Cuenta {numero_cuenta: $numeroCuentaOrigen}),
+                  (cu_destino:Cuenta {numero_cuenta: $numeroCuentaDestino})
+            CREATE (tx:Transaccion {
+                id_transaccion: $id_transaccion,
+                monto: $monto,
+                fecha_hora: datetime($fecha_hora),
+                tipo: "Transferencia",
+                estado: "exitosa",
+                num_cuent_origen: $numeroCuentaOrigen,
+                num_cuent_destino: $numeroCuentaDestino,
+                moneda: $moneda,
+                concepto: $concepto
+            })
+            MERGE (cu_origen)-[:CUENTA_REALIZA_TRANSACCION]->(tx)
+            MERGE (tx)-[:CUENTA_RECIBE_TRANSACCION]->(cu_destino)
+        """
+        session.run(create_transaction_query, {
+            "id_transaccion": transaction_id,
+            "monto": data.monto,
+            "numeroCuentaOrigen": numeroCuentaOrigen,
+            "numeroCuentaDestino": data.numeroCuentaDestino,
+            "fecha_hora": fecha_hora_actual,
+            "moneda": data.moneda,
+            "concepto": data.concepto
+        })
+
+        update_balance_query = """
+            MATCH (cu_origen:Cuenta {numero_cuenta: $numeroCuentaOrigen}),
+                  (cu_destino:Cuenta {numero_cuenta: $numeroCuentaDestino})
+            SET cu_origen.saldo_actual = cu_origen.saldo_actual - $monto,
+                cu_destino.saldo_actual = cu_destino.saldo_actual + $monto
+        """
+        session.run(update_balance_query, {
+            "numeroCuentaOrigen": numeroCuentaOrigen,
+            "numeroCuentaDestino": data.numeroCuentaDestino,
+            "monto": data.monto
+        })
+
+    return {
+        "message": "Transacción realizada con éxito.",
+        "id_transaccion": transaction_id,
+        "monto": data.monto,
+        "moneda": data.moneda,
+        "concepto": data.concepto,
+        "fecha_hora": fecha_hora_actual
+    }

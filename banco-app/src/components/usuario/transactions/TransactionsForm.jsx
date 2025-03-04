@@ -22,28 +22,43 @@ export default function TransactionsForm({ setTransactionStatus, saldoDisponible
   const handleSubmit = async (e) => {
     e.preventDefault();
     const monto = parseFloat(formData.monto);
-
-    if (!formData.destinatario || !formData.numeroCuenta || isNaN(monto) || monto <= 0) {
+    
+    if (!formData.numeroCuenta || isNaN(monto) || monto <= 0) {
       setTransactionStatus("error");
       return;
     }
-
+  
     if (monto > saldoDisponible) {
       setTransactionStatus("insufficient-funds");
       return;
     }
-
+  
+    const usuario = localStorage.getItem("usuario");
+    if (!usuario) {
+      setTransactionStatus("error");
+      console.error("No hay usuario autenticado.");
+      return;
+    }
+  
     try {
       const response = await fetch("http://localhost:8080/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          usuario,  
+          numeroCuentaDestino: formData.numeroCuenta,
+          monto: monto,
+          moneda: formData.moneda,
+          concepto: formData.concepto || ""
+        }),
       });
-
+  
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${errorText}`);
       }
-
+  
+      const transactionData = await response.json();
       setSaldoDisponible((prevSaldo) => prevSaldo - monto);
       setTransactionStatus("success");
     } catch (error) {
@@ -51,7 +66,8 @@ export default function TransactionsForm({ setTransactionStatus, saldoDisponible
       setTransactionStatus("error");
     }
   };
-
+  
+  
   return (
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
       <h3 className="text-xl font-semibold mb-4 text-white text-center">Realizar Pago 💸</h3>

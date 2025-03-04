@@ -16,26 +16,79 @@ def get_db_session():
 
 # Definir columnas esperadas para validación
 EXPECTED_NODE_COLUMNS = [
-    "id:ID", ":LABEL", "cliente_nombre", "cliente_fecha_nacimiento", "cliente_email", "cliente_telefono",
-    "cliente_direcciones", "cliente_riesgo_acumulado", "tarjeta_tipo_tarjeta", "tarjeta_limite_credito",
-    "tarjeta_estatus", "tarjeta_fecha_vencimiento", "tarjeta_número_tarjeta", "tarjeta_emisor",
-    "alerta_descripción", "alerta_fecha_creación", "alerta_nivel_severidad", "alerta_resuelta",
-    "comercio_nombre", "comercio_categoría", "comercio_ubicación", "comercio_reputación",
-    "transaccion_monto", "transaccion_fecha_hora", "transaccion_tipo", "transaccion_estado",
-    "transaccion_ubicación", "transaccion_num_cuent_origen", "transaccion_num_cuent_destino",
-    "transaccion_país_origen", "transaccion_país_destino", "transaccion_moneda", "transaccion_banco_destino",
-    "cuenta_tipo", "cuenta_saldo_actual", "cuenta_fecha_creación", "cuenta_estatus",
-    "cuenta_moneda", "cuenta_saldo_mínimo", "dispositivo_tipo_dispositivo", "dispositivo_ubicación",
-    "dispositivo_estatus_riesgo"
+    "id:ID",
+    ":LABEL",
+    "nombre",
+    "fecha_nacimiento",
+    "email",
+    "telefono",
+    "direcciones",
+    "riesgo_acumulado",
+    "rol",
+    "tipo_tarjeta",
+    "limite_credito",
+    "estatus",
+    "fecha_vencimiento",
+    "numero_tarjeta",
+    "emisor",
+    "descripcion_alerta",
+    "fecha_creacion_alerta",
+    "nivel_severidad_alerta",
+    "resuelta_alerta",
+    "fraude_confirmado_alerta",
+    "nombre_comercio",
+    "categoria_comercio",
+    "ubicacion_comercio",
+    "reputacion_comercio",
+    "monto_transaccion",
+    "fecha_hora_transaccion",
+    "tipo_transaccion",
+    "estado_transaccion",
+    "ubicacion_transaccion",
+    "num_cuenta_origen",
+    "num_cuenta_destino",
+    "pais_origen",
+    "pais_destino",
+    "moneda_transaccion",
+    "banco_destino",
+    "tipo_cuenta",
+    "saldo_actual",
+    "fecha_creacion_cuenta",
+    "estatus_cuenta",
+    "moneda_cuenta",
+    "saldo_minimo",
+    "tipo_dispositivo",
+    "ubicacion_dispositivo",
+    "estatus_riesgo_dispositivo"
 ]
 
 EXPECTED_RELATIONSHIP_COLUMNS = [
-    ":START_ID", ":END_ID", ":TYPE", "frecuencia_uso", "ubicaciones_frecuentes", "estatus_riesgo_usa",
-    "fecha_apertura", "estatus_actual_posee", "saldo_promedio", "canal_realiza", "comentario",
-    "rol", "tipo_pago_ocurre", "estatus_fraude_ocurre", "razon_fraude", "evidencia",
-    "acciones_tomadas", "motivo_alerta", "nivel_riesgo_alerta", "acción_inicial",
-    "estatus_fraude_disp", "direccion_ip", "tipo_conexion", "banco_emisor", "transacciones_totales",
-    "linked_date", "tipo_pago_tarjeta", "estatus_fraude_tarjeta", "canal_uso"
+    ":START_ID",
+    ":END_ID",
+    ":TYPE",
+    "frecuencia_uso",
+    "ubicaciones_frecuentes",
+    "estatus_riesgo",
+    "fecha_apertura",
+    "estatus_actual",
+    "saldo_promedio",
+    "canal",
+    "comentario",
+    "rol",
+    "tipo_pago",
+    "estatus_fraude",
+    "razon_fraude",
+    "evidencia",
+    "acciones_tomadas",
+    "motivo_alerta",
+    "nivel_riesgo",
+    "accion_inicial",
+    "direccion_ip",
+    "tipo_conexion",
+    "banco_emisor",
+    "transacciones_totales",
+    "linked_date",
+    "canal_uso"
 ]
 
 def validate_csv(file: UploadFile, expected_columns):
@@ -52,33 +105,71 @@ def validate_csv(file: UploadFile, expected_columns):
         return False, f"Error al procesar CSV: {str(e)}"
 
 def insert_data_to_neo4j(nodes_df, relationships_df):
-    """Inserta los nodos y relaciones en Neo4j"""
     with get_db_session() as session:
         # Insertar nodos
-        for index, row in nodes_df.iterrows():
-            node_id = row["id:ID"]
-            label = row[":LABEL"]
-            # Convertir las demás columnas a propiedades (omite id y label)
-            properties = row.to_dict()
+        csvId_to_uuid = {}
+
+        for _, row in nodes_df.iterrows():
+            csv_id = str(row["id:ID"]).strip()
+            label = row[":LABEL"].replace(" ", "_")
+
+            properties = {k: v for k, v in row.items() if pd.notna(v)}
             properties.pop("id:ID", None)
             properties.pop(":LABEL", None)
-            cypher = f"MERGE (n:{label} {{id: $id}}) SET n += $props"
-            session.run(cypher, id=node_id, props=properties)
-        # Insertar relaciones
-        for index, row in relationships_df.iterrows():
-            start_id = row[":START_ID"]
-            end_id = row[":END_ID"]
-            rel_type = row[":TYPE"]
-            properties = row.to_dict()
-            properties.pop(":START_ID", None)
-            properties.pop(":END_ID", None)
-            properties.pop(":TYPE", None)
+
+            # MERGE usando csv_id como identificador "real"
             cypher = f"""
-                MATCH (a {{id: $start_id}}), (b {{id: $end_id}})
-                MERGE (a)-[r:{rel_type}]->(b)
-                SET r += $props
+                MERGE (n:{label} {{ csv_id: $csv_id }})
+                ON CREATE SET n += $props
+                RETURN n.csv_id AS realId
             """
-            session.run(cypher, start_id=start_id, end_id=end_id, props=properties)
+            result = session.run(cypher, csv_id=csv_id, props=properties)
+            record = result.single()
+
+            # 'realId' será igual a tu csv_id (p.ej 'D1', 'CO12', etc.)
+            if record and record["realId"]:
+                csvId_to_uuid[csv_id] = record["realId"]  # en realidad guardamos el mismo
+                print(f"Nodo insertado: csv_id={csv_id} => realId={record['realId']}")
+            else:
+                print(f"⚠️ No se pudo insertar el nodo: csv_id={csv_id}")
+
+        # Insertar relaciones
+        for _, row in relationships_df.iterrows():
+            start_csv_id = str(row[":START_ID"]).strip()
+            end_csv_id   = str(row[":END_ID"]).strip()
+            rel_type     = str(row[":TYPE"]).strip().replace(" ", "_")
+
+            start_real_id = csvId_to_uuid.get(start_csv_id)
+            end_real_id   = csvId_to_uuid.get(end_csv_id)
+
+            if not start_real_id or not end_real_id:
+                print(f"❌ No tengo real_id para {start_csv_id} o {end_csv_id}")
+                continue
+
+            rel_properties = {k: v for k, v in row.items() if pd.notna(v)}
+            rel_properties.pop(":START_ID", None)
+            rel_properties.pop(":END_ID", None)
+            rel_properties.pop(":TYPE", None)
+
+            # Creas la relación usando la misma property 'csv_id'
+            cypher = f"""
+                MATCH (a {{ csv_id: $start_id }}), (b {{ csv_id: $end_id }})
+                MERGE (a)-[r:{rel_type}]->(b)
+                ON CREATE SET r += $rel_props
+                RETURN type(r) AS createdRel
+            """
+            result = session.run(
+                cypher,
+                start_id=start_real_id,
+                end_id=end_real_id,
+                rel_props=rel_properties
+            )
+            record = result.single()
+            if record and record["createdRel"]:
+                print(f"Relación creada: {start_csv_id} -[{rel_type}]-> {end_csv_id}")
+
+
+
 
 @csv_router.post("/upload-csv/")
 async def upload_csv(

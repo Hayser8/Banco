@@ -8,7 +8,6 @@ export default function RecentTransactions() {
   const [error, setError] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // Obtener usuario desde localStorage después de renderizar
   useEffect(() => {
     const storedUser = localStorage.getItem("usuario");
     if (storedUser) {
@@ -16,7 +15,6 @@ export default function RecentTransactions() {
     }
   }, []);
 
-  // Obtener historial de transacciones
   useEffect(() => {
     if (!currentUser) {
       setLoading(false);
