@@ -3,8 +3,8 @@ from neo4j import GraphDatabase, basic_auth
 
 notifications_today_router = APIRouter()
 
-URI = "bolt://44.204.125.164"
-AUTH = basic_auth("neo4j", "regrets-plates-break")
+URI = "bolt://18.206.140.55:7687"
+AUTH = basic_auth("neo4j", "cards-attachment-workload")
 
 @notifications_today_router.get("/notifications/today")
 def get_today_notifications():

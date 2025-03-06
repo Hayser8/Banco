@@ -12,10 +12,10 @@ def get_transacciones(
     search: Optional[str] = None
 ):
 
+
     driver = GraphDatabase.driver(
-        "bolt://44.204.125.164",
-        auth=basic_auth("neo4j", "regrets-plates-break")
-    )
+        "bolt://18.206.140.55:7687",
+        auth=basic_auth("neo4j", "cards-attachment-workload"))
 
     with driver.session(database="neo4j") as session:
         query = """

@@ -3,8 +3,8 @@ from neo4j import GraphDatabase, basic_auth
 
 generate_alerts_router = APIRouter()
 
-URI = "bolt://44.204.125.164"
-AUTH = basic_auth("neo4j", "regrets-plates-break")
+URI = "bolt://18.206.140.55:7687"
+AUTH = basic_auth("neo4j", "cards-attachment-workload")
 
 @generate_alerts_router.post("/alerts/generate")
 def generate_alerts():

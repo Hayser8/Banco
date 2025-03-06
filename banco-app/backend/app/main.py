@@ -25,8 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-URI = "bolt://44.204.125.164"
-AUTH = basic_auth("neo4j", "regrets-plates-break")
+URI = "bolt://18.206.140.55:7687"
+AUTH = basic_auth("neo4j", "cards-attachment-workload")
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
 @app.on_event("shutdown")
